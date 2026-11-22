@@ -16256,40 +16256,49 @@ fn test_scaleshot_only_boosts_once() {
         Choices::SPLASH,
     );
 
-    let expected_instructions = vec![
-        StateInstructions {
-            percentage: 10.000002,
-            instruction_list: vec![],
-        },
-        StateInstructions {
-            percentage: 90.0,
-            instruction_list: vec![
-                Instruction::Damage(DamageInstruction {
-                    side_ref: SideReference::SideTwo,
-                    damage_amount: 21,
-                }),
-                Instruction::Damage(DamageInstruction {
-                    side_ref: SideReference::SideTwo,
-                    damage_amount: 21,
-                }),
-                Instruction::Damage(DamageInstruction {
-                    side_ref: SideReference::SideTwo,
-                    damage_amount: 21,
-                }),
-                Instruction::Boost(BoostInstruction {
+    // 10% miss; on a hit, 2-5 hits (35/35/15/15) and the Def -1 / Spe +1 happens once
+    let miss: Vec<_> = vec_of_instructions
+        .iter()
+        .filter(|i| i.instruction_list.is_empty())
+        .collect();
+    assert_eq!(miss.len(), 1);
+    assert!((miss[0].percentage - 10.0).abs() < 0.01);
+    let mut hits_seen = vec![];
+    for branch in vec_of_instructions.iter().filter(|i| !i.instruction_list.is_empty()) {
+        let hits = branch
+            .instruction_list
+            .iter()
+            .filter(|i| matches!(i, Instruction::Damage(_)))
+            .count();
+        let boosts: Vec<_> = branch
+            .instruction_list
+            .iter()
+            .filter(|i| matches!(i, Instruction::Boost(_)))
+            .collect();
+        assert_eq!(
+            boosts,
+            vec![
+                &Instruction::Boost(BoostInstruction {
                     side_ref: SideReference::SideOne,
                     stat: PokemonBoostableStat::Defense,
                     amount: -1,
                 }),
-                Instruction::Boost(BoostInstruction {
+                &Instruction::Boost(BoostInstruction {
                     side_ref: SideReference::SideOne,
                     stat: PokemonBoostableStat::Speed,
                     amount: 1,
                 }),
-            ],
-        },
-    ];
-    assert_eq!(expected_instructions, vec_of_instructions);
+            ]
+        );
+        hits_seen.push((hits, branch.percentage));
+    }
+    hits_seen.sort_by(|a, b| a.0.cmp(&b.0));
+    let expected = [(2, 31.5), (3, 31.5), (4, 13.5), (5, 13.5)];
+    assert_eq!(hits_seen.len(), 4);
+    for ((h, p), (eh, ep)) in hits_seen.iter().zip(expected.iter()) {
+        assert_eq!(h, eh);
+        assert!((p - ep).abs() < 0.01, "{} hits: {}", h, p);
+    }
 }
 
 #[test]

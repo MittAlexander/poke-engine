@@ -2446,13 +2446,15 @@ pub fn generate_instructions_from_move(
             hit_count = 3;
         }
         MultiHitMove::TwoToFiveHits => {
+            // branches on the number of hits below: 2/3 hits 35% each, 4/5 hits 15% each;
+            // Loaded Dice 4 or 5 (50/50); Skill Link always 5
             hit_count =
                 if state.get_side(&attacking_side).get_active().ability == Abilities::SKILLLINK {
                     5
                 } else if state.get_side(&attacking_side).get_active().item == Items::LOADEDDICE {
                     4
                 } else {
-                    3 // too lazy to implement branching here. Average is 3.2 so this is a fine approximation
+                    3
                 };
         }
         MultiHitMove::PopulationBomb => {
@@ -2538,18 +2540,42 @@ pub fn generate_instructions_from_move(
         }
     }
 
+    // Distribution over the number of hits (Showdown: 2-5 hit moves hit 2/3 times with 35%
+    // each and 4/5 times with 15% each; Loaded Dice 4 or 5; Skill Link always 5)
+    let hit_distribution: Vec<(i8, f32)> = match choice.multi_hit() {
+        MultiHitMove::TwoToFiveHits => {
+            let attacker = state.get_side_immutable(&attacking_side).get_active_immutable();
+            if attacker.ability == Abilities::SKILLLINK {
+                vec![(5, 1.0)]
+            } else if attacker.item == Items::LOADEDDICE {
+                vec![(4, 0.5), (5, 0.5)]
+            } else {
+                vec![(2, 0.35), (3, 0.35), (4, 0.15), (5, 0.15)]
+            }
+        }
+        _ => vec![(hit_count, 1.0)],
+    };
+
+    // run_move restores the state when it finishes, so re-apply before each extra branch
     if incoming_instructions.percentage != 0.0 {
-        run_move(
-            state,
-            attacking_side,
-            incoming_instructions,
-            hit_count,
-            does_damage,
-            regular_damage,
-            choice,
-            defender_choice,
-            &mut final_instructions,
-        );
+        for (n, (hits, p)) in hit_distribution.iter().enumerate() {
+            if n > 0 {
+                state.apply_instructions(&incoming_instructions.instruction_list);
+            }
+            let mut ins = incoming_instructions.clone();
+            ins.update_percentage(*p);
+            run_move(
+                state,
+                attacking_side,
+                ins,
+                *hits,
+                does_damage,
+                regular_damage,
+                choice,
+                defender_choice,
+                &mut final_instructions,
+            );
+        }
     } else {
         state.reverse_instructions(&incoming_instructions.instruction_list);
     }
@@ -2557,18 +2583,22 @@ pub fn generate_instructions_from_move(
     // A branch representing either a roll that kills the opponent or a crit
     if let Some(branch_ins) = branch_instructions {
         if branch_ins.percentage != 0.0 {
-            state.apply_instructions(&branch_ins.instruction_list);
-            run_move(
-                state,
-                attacking_side,
-                branch_ins,
-                hit_count,
-                does_damage,
-                branch_damage,
-                choice,
-                defender_choice,
-                &mut final_instructions,
-            );
+            for (hits, p) in hit_distribution.iter() {
+                state.apply_instructions(&branch_ins.instruction_list);
+                let mut ins = branch_ins.clone();
+                ins.update_percentage(*p);
+                run_move(
+                    state,
+                    attacking_side,
+                    ins,
+                    *hits,
+                    does_damage,
+                    branch_damage,
+                    choice,
+                    defender_choice,
+                    &mut final_instructions,
+                );
+            }
         }
     }
 

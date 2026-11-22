@@ -560,3 +560,32 @@ fn test_leftovers_before_burn_damage() {
     let b = outcomes(&state, Choices::SPLASH, Choices::SPLASH);
     assert!(always(&b, |s| s.side_one.get_active_immutable().hp == 330));
 }
+
+// ------------------------------------------------------------------ exact hit counts
+
+#[test]
+fn test_two_to_five_hit_distribution() {
+    let mut state = State::default();
+    state.side_two.get_active().hp = 1000;
+    state.side_two.get_active().maxhp = 1000;
+    let b = outcomes(&state, Choices::BULLETSEED, Choices::SPLASH);
+    let mut by_damage = std::collections::BTreeMap::new();
+    for (p, s) in &b {
+        *by_damage.entry(1000 - s.side_two.get_active_immutable().hp).or_insert(0.0) += p;
+    }
+    assert_eq!(by_damage.len(), 4, "{:?}", by_damage); // 2, 3, 4, 5 hits (no crits/kills here)
+}
+
+#[test]
+fn test_loaded_dice_hits_four_or_five() {
+    let mut state = State::default();
+    state.side_one.get_active().item = Items::LOADEDDICE;
+    state.side_two.get_active().hp = 1000;
+    state.side_two.get_active().maxhp = 1000;
+    let b = outcomes(&state, Choices::BULLETSEED, Choices::SPLASH);
+    let mut by_damage = std::collections::BTreeMap::new();
+    for (p, s) in &b {
+        *by_damage.entry(1000 - s.side_two.get_active_immutable().hp).or_insert(0.0) += p;
+    }
+    assert_eq!(by_damage.len(), 2, "{:?}", by_damage);
+}
