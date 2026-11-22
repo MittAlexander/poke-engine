@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 use super::abilities::Abilities;
 use super::damage_calc::type_effectiveness_modifier;
-use super::generate_instructions::{apply_boost_instruction, immune_to_status};
+use super::generate_instructions::{apply_boost_instruction, immune_to_status, EndOfTurnPhase};
 use super::state::Terrain;
 use crate::choices::{Choice, Choices, Effect, MoveCategory, MoveTarget, Secondary, StatBoosts};
 use crate::define_enum_with_from_str;
@@ -942,7 +942,15 @@ pub fn item_end_of_turn(
     state: &mut State,
     side_ref: &SideReference,
     instructions: &mut StateInstructions,
+    phase: EndOfTurnPhase,
 ) {
+    let early = matches!(
+        state.get_side_immutable(side_ref).get_active_immutable().item,
+        Items::LEFTOVERS | Items::BLACKSLUDGE
+    );
+    if early != (phase == EndOfTurnPhase::Early) {
+        return;
+    }
     // Heal Block stops healing items; a Sitrus Berry isn't even eaten (Showdown onTryEatItem)
     let heal_blocked = state.get_side_immutable(side_ref).volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK);
     let attacking_side = state.get_side(side_ref);

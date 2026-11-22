@@ -2938,6 +2938,16 @@ fn on_terrain_end(
     }
 }
 
+/// Showdown resolves end-of-turn effects in residual order. Heals and status cures from
+/// items/abilities (Leftovers, Black Sludge: 5; Shed Skin, Hydration: 5.3; weather
+/// abilities: 1) come before Leech Seed (8) and status damage (9, 10); everything else
+/// (Speed Boost, Moody, orbs, berries, ...) comes after.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum EndOfTurnPhase {
+    Early,
+    Late,
+}
+
 fn add_end_of_turn_instructions(
     state: &mut State,
     mut incoming_instructions: &mut StateInstructions,
@@ -3207,6 +3217,61 @@ fn add_end_of_turn_instructions(
         }
     }
 
+    // healing / curing items and abilities (early residual order)
+    for side_ref in sides {
+        let side = state.get_side(side_ref);
+        let active_pkmn = side.get_active();
+        if active_pkmn.hp == 0 {
+            continue;
+        }
+
+        item_end_of_turn(state, side_ref, &mut incoming_instructions, EndOfTurnPhase::Early);
+        ability_end_of_turn(state, side_ref, &mut incoming_instructions, EndOfTurnPhase::Early);
+    }
+
+    // leechseed sap
+    for side_ref in sides {
+        let seeder_heal_blocked = state
+            .get_side_immutable(&side_ref.get_other_side())
+            .volatile_statuses
+            .contains(&PokemonVolatileStatus::HEALBLOCK);
+        let (leechseed_side, other_side) = state.get_both_sides(side_ref);
+        if leechseed_side
+            .volatile_statuses
+            .contains(&PokemonVolatileStatus::LEECHSEED)
+        {
+            let active_pkmn = leechseed_side.get_active();
+            let other_active_pkmn = other_side.get_active();
+            if active_pkmn.hp == 0
+                || other_active_pkmn.hp == 0
+                || active_pkmn.ability == Abilities::MAGICGUARD
+            {
+                continue;
+            }
+
+            let health_sapped = cmp::min((active_pkmn.maxhp as f32 * 0.125) as i16, active_pkmn.hp);
+            let damage_ins = Instruction::Damage(DamageInstruction {
+                side_ref: *side_ref,
+                damage_amount: health_sapped,
+            });
+            active_pkmn.hp -= health_sapped;
+            incoming_instructions.instruction_list.push(damage_ins);
+
+            let health_recovered = cmp::min(
+                health_sapped,
+                other_active_pkmn.maxhp - other_active_pkmn.hp,
+            );
+            if health_recovered > 0 && !seeder_heal_blocked {
+                let heal_ins = Instruction::Heal(HealInstruction {
+                    side_ref: side_ref.get_other_side(),
+                    heal_amount: health_recovered,
+                });
+                other_active_pkmn.hp += health_recovered;
+                incoming_instructions.instruction_list.push(heal_ins);
+            }
+        }
+    }
+
     // status damage
     for side_ref in sides {
         let (side, other_side) = state.get_both_sides(side_ref);
@@ -3294,7 +3359,7 @@ fn add_end_of_turn_instructions(
         }
     }
 
-    // ability/item end-of-turn effects
+    // ability/item end-of-turn effects (late residual order)
     for side_ref in sides {
         let side = state.get_side(side_ref);
         let active_pkmn = side.get_active();
@@ -3302,51 +3367,8 @@ fn add_end_of_turn_instructions(
             continue;
         }
 
-        item_end_of_turn(state, side_ref, &mut incoming_instructions);
-        ability_end_of_turn(state, side_ref, &mut incoming_instructions);
-    }
-
-    // leechseed sap
-    for side_ref in sides {
-        let seeder_heal_blocked = state
-            .get_side_immutable(&side_ref.get_other_side())
-            .volatile_statuses
-            .contains(&PokemonVolatileStatus::HEALBLOCK);
-        let (leechseed_side, other_side) = state.get_both_sides(side_ref);
-        if leechseed_side
-            .volatile_statuses
-            .contains(&PokemonVolatileStatus::LEECHSEED)
-        {
-            let active_pkmn = leechseed_side.get_active();
-            let other_active_pkmn = other_side.get_active();
-            if active_pkmn.hp == 0
-                || other_active_pkmn.hp == 0
-                || active_pkmn.ability == Abilities::MAGICGUARD
-            {
-                continue;
-            }
-
-            let health_sapped = cmp::min((active_pkmn.maxhp as f32 * 0.125) as i16, active_pkmn.hp);
-            let damage_ins = Instruction::Damage(DamageInstruction {
-                side_ref: *side_ref,
-                damage_amount: health_sapped,
-            });
-            active_pkmn.hp -= health_sapped;
-            incoming_instructions.instruction_list.push(damage_ins);
-
-            let health_recovered = cmp::min(
-                health_sapped,
-                other_active_pkmn.maxhp - other_active_pkmn.hp,
-            );
-            if health_recovered > 0 && !seeder_heal_blocked {
-                let heal_ins = Instruction::Heal(HealInstruction {
-                    side_ref: side_ref.get_other_side(),
-                    heal_amount: health_recovered,
-                });
-                other_active_pkmn.hp += health_recovered;
-                incoming_instructions.instruction_list.push(heal_ins);
-            }
-        }
+        item_end_of_turn(state, side_ref, &mut incoming_instructions, EndOfTurnPhase::Late);
+        ability_end_of_turn(state, side_ref, &mut incoming_instructions, EndOfTurnPhase::Late);
     }
 
     // volatile statuses

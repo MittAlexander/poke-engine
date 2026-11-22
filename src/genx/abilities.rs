@@ -1,6 +1,8 @@
 #![allow(unused_variables)]
 use super::damage_calc::type_effectiveness_modifier;
-use super::generate_instructions::{add_remove_status_instructions, apply_boost_instruction};
+use super::generate_instructions::{
+    add_remove_status_instructions, apply_boost_instruction, EndOfTurnPhase,
+};
 use super::items::{get_choice_move_disable_instructions, Items};
 use super::state::{PokemonVolatileStatus, Terrain, Weather};
 use crate::choices::{
@@ -1204,7 +1206,19 @@ pub fn ability_end_of_turn(
     state: &mut State,
     side_ref: &SideReference,
     instructions: &mut StateInstructions,
+    phase: EndOfTurnPhase,
 ) {
+    let early = matches!(
+        state.get_side_immutable(side_ref).get_active_immutable().ability,
+        Abilities::ICEBODY
+            | Abilities::RAINDISH
+            | Abilities::DRYSKIN
+            | Abilities::SHEDSKIN
+            | Abilities::HYDRATION
+    );
+    if early != (phase == EndOfTurnPhase::Early) {
+        return;
+    }
     // Heal Block stops every heal (Showdown onTryHeal)
     let heal_blocked = state.get_side_immutable(side_ref).volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK);
     let (attacking_side, defending_side) = state.get_both_sides(side_ref);

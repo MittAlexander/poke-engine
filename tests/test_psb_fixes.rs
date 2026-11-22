@@ -544,3 +544,19 @@ fn test_disable_counter_survives_serialization() {
     assert_eq!(s2.side_one.volatile_status_durations.disable_ticks(), 5);
     assert_eq!(s2.side_one.volatile_status_durations.disable_move_index(), PokemonMoveIndex::M2);
 }
+
+// ------------------------------------------------------------------ end-of-turn residual order
+
+#[test]
+fn test_leftovers_before_burn_damage() {
+    // Showdown: Leftovers (5.4) heals before burn damage (10). At 330/352 the holder
+    // heals to full and is then burned back down.
+    let mut state = State::default();
+    let a = state.side_one.get_active();
+    a.maxhp = 352;
+    a.hp = 330;
+    a.item = Items::LEFTOVERS;
+    a.status = PokemonStatus::BURN;
+    let b = outcomes(&state, Choices::SPLASH, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_one.get_active_immutable().hp == 330));
+}

@@ -21988,10 +21988,7 @@ fn test_shedskin_end_of_turn() {
     let expected_instructions = vec![StateInstructions {
         percentage: 100.0,
         instruction_list: vec![
-            Instruction::Damage(DamageInstruction {
-                side_ref: SideReference::SideTwo,
-                damage_amount: 12,
-            }),
+            // cured at residual order 5.3, before poison damage (9)
             Instruction::ChangeStatus(ChangeStatusInstruction {
                 side_ref: SideReference::SideTwo,
                 pokemon_index: PokemonIndex::P0,
@@ -22019,10 +22016,7 @@ fn test_hydration_end_of_turn() {
     let expected_instructions = vec![StateInstructions {
         percentage: 100.0,
         instruction_list: vec![
-            Instruction::Damage(DamageInstruction {
-                side_ref: SideReference::SideTwo,
-                damage_amount: 12,
-            }),
+            // cured at residual order 5.3, before poison damage (9)
             Instruction::ChangeStatus(ChangeStatusInstruction {
                 side_ref: SideReference::SideTwo,
                 pokemon_index: PokemonIndex::P0,
