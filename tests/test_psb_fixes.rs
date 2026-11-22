@@ -589,3 +589,16 @@ fn test_loaded_dice_hits_four_or_five() {
     }
     assert_eq!(by_damage.len(), 2, "{:?}", by_damage);
 }
+
+// ------------------------------------------------------------------ Light Clay
+
+#[test]
+fn test_light_clay_extends_reflect_to_eight_turns() {
+    let mut state = State::default();
+    state.side_one.get_active().item = Items::LIGHTCLAY;
+    let b = outcomes(&state, Choices::REFLECT, Choices::SPLASH);
+    // set to 8, then one end of turn ticks it down
+    assert!(always(&b, |s| s.side_one.side_conditions.reflect == 7));
+    let plain = outcomes(&State::default(), Choices::REFLECT, Choices::SPLASH);
+    assert!(always(&plain, |s| s.side_one.side_conditions.reflect == 4));
+}

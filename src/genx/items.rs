@@ -279,6 +279,7 @@ define_enum_with_from_str! {
         TATSUGIRINITE,
         ZERAORITE,
         ZYGARDITE,
+        LIGHTCLAY,
     },
     default = UNKNOWNITEM
 }
