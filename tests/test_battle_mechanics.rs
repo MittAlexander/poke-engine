@@ -35,6 +35,8 @@ use poke_engine::instruction::ToggleTerastallizedInstruction;
 
 #[cfg(not(feature = "champions"))]
 use poke_engine::engine::generate_instructions::MAX_SLEEP_TURNS;
+#[cfg(any(feature = "gen9", feature = "champions"))]
+use poke_engine::instruction::ToggleSwitchInBoostUsedInstruction;
 
 pub fn generate_instructions_with_state_assertion(
     state: &mut State,
@@ -10997,10 +10999,7 @@ fn test_guaranteed_to_stay_asleep_sleeptalk_move_when_not_rested() {
                     new_turns: 1,
                     previous_turns: 0,
                 }),
-                Instruction::ApplyVolatileStatus(ApplyVolatileStatusInstruction {
-                    side_ref: SideReference::SideOne,
-                    volatile_status: PokemonVolatileStatus::CURSE,
-                }),
+                // non-Ghost Curse only changes stats (no curse volatile on the user)
                 Instruction::Boost(BoostInstruction {
                     side_ref: SideReference::SideOne,
                     stat: PokemonBoostableStat::Attack,
@@ -11104,10 +11103,7 @@ fn test_small_chance_to_awaken_sleeptalk_move_when_not_rested() {
                     new_turns: 2,
                     previous_turns: 1,
                 }),
-                Instruction::ApplyVolatileStatus(ApplyVolatileStatusInstruction {
-                    side_ref: SideReference::SideOne,
-                    volatile_status: PokemonVolatileStatus::CURSE,
-                }),
+                // non-Ghost Curse only changes stats (no curse volatile on the user)
                 Instruction::Boost(BoostInstruction {
                     side_ref: SideReference::SideOne,
                     stat: PokemonBoostableStat::Attack,
@@ -11211,10 +11207,7 @@ fn test_large_chance_to_awaken_sleeptalk_move_when_not_rested() {
                     new_turns: 4,
                     previous_turns: 3,
                 }),
-                Instruction::ApplyVolatileStatus(ApplyVolatileStatusInstruction {
-                    side_ref: SideReference::SideOne,
-                    volatile_status: PokemonVolatileStatus::CURSE,
-                }),
+                // non-Ghost Curse only changes stats (no curse volatile on the user)
                 Instruction::Boost(BoostInstruction {
                     side_ref: SideReference::SideOne,
                     stat: PokemonBoostableStat::Attack,
@@ -17794,20 +17787,26 @@ fn test_dauntlessshield() {
         &MoveChoice::Move(PokemonMoveIndex::M0),
     );
 
+    let mut instruction_list = vec![Instruction::Switch(SwitchInstruction {
+        side_ref: SideReference::SideOne,
+        previous_index: PokemonIndex::P0,
+        next_index: PokemonIndex::P1,
+    })];
+    // gen 9: the boost is once per battle, so its use is recorded
+    #[cfg(any(feature = "gen9", feature = "champions"))]
+    instruction_list.push(Instruction::ToggleSwitchInBoostUsed(
+        ToggleSwitchInBoostUsedInstruction {
+            side_ref: SideReference::SideOne,
+        },
+    ));
+    instruction_list.push(Instruction::Boost(BoostInstruction {
+        side_ref: SideReference::SideOne,
+        stat: PokemonBoostableStat::Defense,
+        amount: 1,
+    }));
     let expected_instructions = vec![StateInstructions {
         percentage: 100.0,
-        instruction_list: vec![
-            Instruction::Switch(SwitchInstruction {
-                side_ref: SideReference::SideOne,
-                previous_index: PokemonIndex::P0,
-                next_index: PokemonIndex::P1,
-            }),
-            Instruction::Boost(BoostInstruction {
-                side_ref: SideReference::SideOne,
-                stat: PokemonBoostableStat::Defense,
-                amount: 1,
-            }),
-        ],
+        instruction_list,
     }];
     assert_eq!(expected_instructions, vec_of_instructions);
 }
@@ -17823,20 +17822,26 @@ fn test_intrepidsword() {
         &MoveChoice::Move(PokemonMoveIndex::M0),
     );
 
+    let mut instruction_list = vec![Instruction::Switch(SwitchInstruction {
+        side_ref: SideReference::SideOne,
+        previous_index: PokemonIndex::P0,
+        next_index: PokemonIndex::P1,
+    })];
+    // gen 9: the boost is once per battle, so its use is recorded
+    #[cfg(any(feature = "gen9", feature = "champions"))]
+    instruction_list.push(Instruction::ToggleSwitchInBoostUsed(
+        ToggleSwitchInBoostUsedInstruction {
+            side_ref: SideReference::SideOne,
+        },
+    ));
+    instruction_list.push(Instruction::Boost(BoostInstruction {
+        side_ref: SideReference::SideOne,
+        stat: PokemonBoostableStat::Attack,
+        amount: 1,
+    }));
     let expected_instructions = vec![StateInstructions {
         percentage: 100.0,
-        instruction_list: vec![
-            Instruction::Switch(SwitchInstruction {
-                side_ref: SideReference::SideOne,
-                previous_index: PokemonIndex::P0,
-                next_index: PokemonIndex::P1,
-            }),
-            Instruction::Boost(BoostInstruction {
-                side_ref: SideReference::SideOne,
-                stat: PokemonBoostableStat::Attack,
-                amount: 1,
-            }),
-        ],
+        instruction_list,
     }];
     assert_eq!(expected_instructions, vec_of_instructions);
 }
@@ -22435,10 +22440,7 @@ fn test_sleeptalk_when_asleep_and_rest_turns_active() {
                 Instruction::DecrementRestTurns(DecrementRestTurnsInstruction {
                     side_ref: SideReference::SideOne,
                 }),
-                Instruction::ApplyVolatileStatus(ApplyVolatileStatusInstruction {
-                    side_ref: SideReference::SideOne,
-                    volatile_status: PokemonVolatileStatus::CURSE,
-                }),
+                // non-Ghost Curse only changes stats (no curse volatile on the user)
                 Instruction::Boost(BoostInstruction {
                     side_ref: SideReference::SideOne,
                     stat: PokemonBoostableStat::Attack,

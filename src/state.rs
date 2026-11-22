@@ -874,6 +874,8 @@ pub struct Pokemon {
     pub terastallized: bool,
     pub tera_type: PokemonType,
     pub moves: PokemonMoves,
+    /// Gen 9: Intrepid Sword / Dauntless Shield activate once per battle
+    pub switch_in_boost_used: bool,
 }
 
 impl Default for Pokemon {
@@ -902,6 +904,7 @@ impl Default for Pokemon {
             mega_evolved: false,
             terastallized: false,
             tera_type: PokemonType::NORMAL,
+            switch_in_boost_used: false,
             moves: PokemonMoves {
                 m0: Default::default(),
                 m1: Default::default(),
@@ -964,7 +967,7 @@ impl Pokemon {
             self.evs.0, self.evs.1, self.evs.2, self.evs.3, self.evs.4, self.evs.5
         );
         format!(
-            "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+            "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
             self.id,
             self.level,
             self.types.0.to_string(),
@@ -994,6 +997,7 @@ impl Pokemon {
             self.mega_evolved,
             self.terastallized,
             self.tera_type.to_string(),
+            self.switch_in_boost_used,
         )
     }
 
@@ -1048,6 +1052,10 @@ impl Pokemon {
             mega_evolved: split[26].parse::<bool>().unwrap(),
             terastallized: split[27].parse::<bool>().unwrap(),
             tera_type: PokemonType::from_str(split[28]).unwrap(),
+            // optional trailing field: older state strings omit it
+            switch_in_boost_used: split
+                .get(29)
+                .map_or(false, |v| v.parse::<bool>().unwrap_or(false)),
         }
     }
 }
@@ -1949,6 +1957,10 @@ impl State {
                 SideReference::SideOne => self.side_one.get_active().terastallized ^= true,
                 SideReference::SideTwo => self.side_two.get_active().terastallized ^= true,
             },
+            Instruction::ToggleSwitchInBoostUsed(instruction) => match instruction.side_ref {
+                SideReference::SideOne => self.side_one.get_active().switch_in_boost_used ^= true,
+                SideReference::SideTwo => self.side_two.get_active().switch_in_boost_used ^= true,
+            },
             Instruction::ToggleMegaEvolved(instruction) => match instruction.side_ref {
                 SideReference::SideOne => self.side_one.get_active().mega_evolved ^= true,
                 SideReference::SideTwo => self.side_two.get_active().mega_evolved ^= true,
@@ -2150,6 +2162,10 @@ impl State {
             Instruction::ToggleTerastallized(instruction) => match instruction.side_ref {
                 SideReference::SideOne => self.side_one.get_active().terastallized ^= true,
                 SideReference::SideTwo => self.side_two.get_active().terastallized ^= true,
+            },
+            Instruction::ToggleSwitchInBoostUsed(instruction) => match instruction.side_ref {
+                SideReference::SideOne => self.side_one.get_active().switch_in_boost_used ^= true,
+                SideReference::SideTwo => self.side_two.get_active().switch_in_boost_used ^= true,
             },
             Instruction::ToggleMegaEvolved(instruction) => match instruction.side_ref {
                 SideReference::SideOne => self.side_one.get_active().mega_evolved ^= true,

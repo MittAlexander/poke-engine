@@ -1787,6 +1787,7 @@ fn before_move(
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             })
         }
@@ -6384,7 +6385,11 @@ mod tests {
 
         let expected_instructions = vec![StateInstructions {
             percentage: 100.0,
-            instruction_list: vec![],
+            instruction_list: vec![Instruction::Boost(BoostInstruction {
+                side_ref: SideReference::SideTwo,
+                stat: PokemonBoostableStat::Evasion,
+                amount: -1,
+            })],
         }];
 
         assert_eq!(instructions, expected_instructions)
@@ -6411,12 +6416,19 @@ mod tests {
 
         let expected_instructions = vec![StateInstructions {
             percentage: 100.0,
-            instruction_list: vec![Instruction::ChangeTerrain(ChangeTerrain {
-                new_terrain: Terrain::NONE,
-                new_terrain_turns_remaining: 0,
-                previous_terrain: Terrain::ELECTRICTERRAIN,
-                previous_terrain_turns_remaining: 1,
-            })],
+            instruction_list: vec![
+                Instruction::ChangeTerrain(ChangeTerrain {
+                    new_terrain: Terrain::NONE,
+                    new_terrain_turns_remaining: 0,
+                    previous_terrain: Terrain::ELECTRICTERRAIN,
+                    previous_terrain_turns_remaining: 1,
+                }),
+                Instruction::Boost(BoostInstruction {
+                side_ref: SideReference::SideTwo,
+                stat: PokemonBoostableStat::Evasion,
+                amount: -1,
+            }),
+            ],
         }];
 
         assert_eq!(instructions, expected_instructions)
@@ -6452,16 +6464,17 @@ mod tests {
                     previous_terrain: Terrain::ELECTRICTERRAIN,
                     previous_terrain_turns_remaining: 1,
                 }),
-                Instruction::ChangeSideCondition(ChangeSideConditionInstruction {
-                    side_ref: SideReference::SideOne,
-                    side_condition: PokemonSideCondition::Reflect,
-                    amount: -1,
-                }),
+                // only the target's screens are removed; the user's Reflect stays
                 Instruction::ChangeSideCondition(ChangeSideConditionInstruction {
                     side_ref: SideReference::SideTwo,
                     side_condition: PokemonSideCondition::Reflect,
                     amount: -1,
                 }),
+                Instruction::Boost(BoostInstruction {
+                side_ref: SideReference::SideTwo,
+                stat: PokemonBoostableStat::Evasion,
+                amount: -1,
+            }),
             ],
         }];
         assert_eq!(instructions, expected_instructions)

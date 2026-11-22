@@ -71,6 +71,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -98,6 +99,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -125,6 +127,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: -1,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -149,6 +152,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -176,6 +180,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -2,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -269,6 +274,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 2,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -382,6 +388,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -406,6 +413,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 2,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -448,6 +456,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 1,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -474,6 +483,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -548,6 +558,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -628,6 +639,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -809,6 +821,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -836,6 +849,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -863,6 +877,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -903,6 +918,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 2,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -966,6 +982,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -1056,6 +1073,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -1344,6 +1362,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -1428,6 +1447,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -1802,6 +1822,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -1873,6 +1894,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -1904,6 +1926,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -1931,6 +1954,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -1959,6 +1983,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -1986,6 +2011,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -2029,6 +2055,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -2052,6 +2079,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -2078,6 +2106,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -2219,6 +2248,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -2255,6 +2285,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -2311,6 +2342,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             volatile_status: Some(VolatileStatus {
@@ -2342,6 +2374,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -2366,6 +2399,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -2440,6 +2474,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -2577,6 +2612,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -2630,6 +2666,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -2653,6 +2690,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -2676,6 +2714,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 1,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -2765,6 +2804,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -2829,6 +2869,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -2857,6 +2898,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -2943,6 +2985,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -2966,6 +3009,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -2997,6 +3041,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -2,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -3023,6 +3068,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -2,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -3210,6 +3256,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: -1,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -3239,6 +3286,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -3268,6 +3316,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -3304,6 +3353,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             volatile_status: Some(VolatileStatus {
@@ -3441,6 +3491,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -3464,6 +3515,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -3487,6 +3539,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             volatile_status: Some(VolatileStatus {
@@ -3515,6 +3568,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: -1,
                 },
             }),
             ..Default::default()
@@ -3583,6 +3637,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -3611,6 +3666,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -4016,6 +4072,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 1,
                 },
             }),
             ..Default::default()
@@ -4048,6 +4105,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -4075,6 +4133,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -4102,6 +4161,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -4173,6 +4233,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -4439,6 +4500,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -4533,6 +4595,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -4586,6 +4649,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -4715,6 +4779,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -4832,6 +4897,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: -1,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -4860,6 +4926,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: -1,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -4914,6 +4981,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -5096,6 +5164,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -2,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -5150,6 +5219,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -5265,6 +5335,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -5291,6 +5362,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -5459,6 +5531,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -5662,6 +5735,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -5773,6 +5847,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: -1,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -5799,6 +5874,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -5823,6 +5899,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             volatile_status: Some(VolatileStatus {
@@ -5853,6 +5930,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -6028,6 +6106,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -6519,6 +6598,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 2,
                     speed: 2,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -6648,6 +6728,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -6879,6 +6960,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -6915,6 +6997,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -6943,6 +7026,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -6967,6 +7051,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -7158,6 +7243,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -7193,6 +7279,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -7281,6 +7368,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -8127,6 +8215,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 1,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -8198,6 +8287,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -8392,6 +8482,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -8579,6 +8670,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -8713,6 +8805,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -8886,6 +8979,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -8934,6 +9028,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -9125,6 +9220,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: -1,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -9392,6 +9488,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -9419,6 +9516,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -9447,6 +9545,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: -1,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -9533,6 +9632,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -9676,6 +9776,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -9777,6 +9878,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -9805,6 +9907,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -9848,6 +9951,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -2,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -9905,6 +10009,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -9932,6 +10037,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: -1,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -9959,6 +10065,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: -1,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -10198,6 +10305,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -10294,6 +10402,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -10394,6 +10503,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             heal: Some(Heal {
@@ -10439,6 +10549,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -10465,6 +10576,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -2,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -10531,6 +10643,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -10561,6 +10674,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -10667,6 +10781,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 2,
                 },
             }),
             volatile_status: Some(VolatileStatus {
@@ -10740,6 +10855,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: -1,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -10784,6 +10900,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -10812,6 +10929,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -10864,6 +10982,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -10980,6 +11099,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: -1,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -11013,6 +11133,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: -1,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -11041,6 +11162,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: -1,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -11069,6 +11191,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -11095,6 +11218,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: -1,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -11172,6 +11296,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -11199,6 +11324,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -11227,6 +11353,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -11250,6 +11377,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -11335,6 +11463,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: -1,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -11405,6 +11534,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -11428,6 +11558,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 1,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             volatile_status: Some(VolatileStatus {
@@ -11544,6 +11675,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: -1,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -11603,6 +11735,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 1,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -11721,6 +11854,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -11748,6 +11882,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -11787,6 +11922,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -11854,6 +11990,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -12106,6 +12243,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -12134,6 +12272,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -12435,6 +12574,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -12623,6 +12763,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -12762,6 +12903,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -12789,6 +12931,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: -1,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -12862,6 +13005,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -12949,6 +13093,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -13144,6 +13289,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 1,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -13266,6 +13412,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -13329,6 +13476,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -13709,6 +13857,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 2,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -13775,6 +13924,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -13803,6 +13953,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -13870,6 +14021,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -13898,6 +14050,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -14120,6 +14273,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: -1,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -14145,6 +14299,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: -1,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -14285,6 +14440,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -14315,6 +14471,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -2,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -14340,6 +14497,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: -2,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -14401,6 +14559,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -14497,6 +14656,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -2,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -14569,6 +14729,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -1,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -14595,6 +14756,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -14685,6 +14847,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -14708,6 +14871,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -14778,6 +14942,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -1,
                     speed: 2,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -14816,6 +14981,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -14839,6 +15005,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 2,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -14932,6 +15099,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 1,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -15035,6 +15203,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -15432,6 +15601,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: -1,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -15479,6 +15649,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -15766,6 +15937,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -15856,6 +16028,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -2,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -15883,6 +16056,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -16018,6 +16192,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -16136,6 +16311,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -16365,6 +16541,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -2,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -16412,6 +16589,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -16439,6 +16617,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 }]),
                 ..Default::default()
@@ -16629,6 +16808,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -16733,6 +16913,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 volatile_status: Some(VolatileStatus {
@@ -16763,6 +16944,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 volatile_status: Some(VolatileStatus {
@@ -16823,6 +17005,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: -2,
                 },
             }),
             ..Default::default()
@@ -16872,6 +17055,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -17004,6 +17188,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -17028,6 +17213,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 }),
                 ..Default::default()
@@ -17069,6 +17255,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -17139,6 +17326,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             volatile_status: Some(VolatileStatus {
@@ -17183,6 +17371,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -17690,6 +17879,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -17800,6 +17990,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -17823,6 +18014,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -17863,6 +18055,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -17967,6 +18160,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -17994,6 +18188,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -18119,6 +18314,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 },
                 Secondary {
@@ -18200,6 +18396,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -18383,6 +18580,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: -1,
                     speed: -1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -18447,6 +18645,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 1,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -19060,6 +19259,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -19110,6 +19310,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             }),
             ..Default::default()
@@ -19331,6 +19532,7 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 }),
             }]),
             ..Default::default()
@@ -19398,6 +19600,7 @@ pub struct StatBoosts {
     pub special_defense: i8,
     pub speed: i8,
     pub accuracy: i8,
+    pub evasion: i8,
 }
 
 impl Default for StatBoosts {
@@ -19409,12 +19612,13 @@ impl Default for StatBoosts {
             special_defense: 0,
             speed: 0,
             accuracy: 0,
+            evasion: 0,
         }
     }
 }
 
 impl StatBoosts {
-    pub fn get_as_pokemon_boostable(&self) -> [(PokemonBoostableStat, i8); 6] {
+    pub fn get_as_pokemon_boostable(&self) -> [(PokemonBoostableStat, i8); 7] {
         [
             (PokemonBoostableStat::Attack, self.attack),
             (PokemonBoostableStat::Defense, self.defense),
@@ -19422,6 +19626,7 @@ impl StatBoosts {
             (PokemonBoostableStat::SpecialDefense, self.special_defense),
             (PokemonBoostableStat::Speed, self.speed),
             (PokemonBoostableStat::Accuracy, self.accuracy),
+            (PokemonBoostableStat::Evasion, self.evasion),
         ]
     }
 }
@@ -20735,6 +20940,7 @@ fn apply_champions_modifiers(moves: &mut HashMap<Choices, Choice>) {
             special_defense: 0,
             speed: 0,
             accuracy: 0,
+            evasion: 0,
         },
     });
     moves.get_mut(&Choices::MOONBLAST).unwrap().secondaries = Some(vec![Secondary {
@@ -20747,6 +20953,7 @@ fn apply_champions_modifiers(moves: &mut HashMap<Choices, Choice>) {
             special_defense: 0,
             speed: 0,
             accuracy: 0,
+            evasion: 0,
         }),
     }]);
     moves.get_mut(&Choices::MOUNTAINGALE).unwrap().base_power = 120.0;
@@ -20767,6 +20974,7 @@ fn apply_champions_modifiers(moves: &mut HashMap<Choices, Choice>) {
             special_defense: 0,
             speed: -2,
             accuracy: 0,
+            evasion: 0,
         },
     });
     moves.get_mut(&Choices::TRIPLEDIVE).unwrap().base_power = 35.0;

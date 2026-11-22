@@ -14,6 +14,8 @@ use crate::instruction::{
     ChangeType, ChangeVolatileStatusDurationInstruction, ChangeWeather, DamageInstruction,
     FormeChangeInstruction, HealInstruction, Instruction, StateInstructions,
 };
+#[cfg(any(feature = "gen9", feature = "champions"))]
+use crate::instruction::ToggleSwitchInBoostUsedInstruction;
 use crate::pokemon::PokemonName;
 use crate::state::{
     Pokemon, PokemonBoostableStat, PokemonSideCondition, PokemonStatus, PokemonType, Side,
@@ -1503,15 +1505,31 @@ pub fn ability_on_switch_in(
             );
         }
         Abilities::INTREPIDSWORD => {
-            // no need to check for boost at +6 because we are switching in
-            attacking_side.attack_boost += 1;
-            instructions
-                .instruction_list
-                .push(Instruction::Boost(BoostInstruction {
-                    side_ref: *side_ref,
-                    stat: PokemonBoostableStat::Attack,
-                    amount: 1,
-                }));
+            // Gen 9: only the first switch-in of the battle gets the boost
+            #[cfg(any(feature = "gen9", feature = "champions"))]
+            let first_time = !attacking_side.get_active_immutable().switch_in_boost_used;
+            #[cfg(not(any(feature = "gen9", feature = "champions")))]
+            let first_time = true;
+            if first_time {
+                #[cfg(any(feature = "gen9", feature = "champions"))]
+                {
+                    attacking_side.get_active().switch_in_boost_used = true;
+                    instructions
+                        .instruction_list
+                        .push(Instruction::ToggleSwitchInBoostUsed(
+                            ToggleSwitchInBoostUsedInstruction { side_ref: *side_ref },
+                        ));
+                }
+                // no need to check for boost at +6 because we are switching in
+                attacking_side.attack_boost += 1;
+                instructions
+                    .instruction_list
+                    .push(Instruction::Boost(BoostInstruction {
+                        side_ref: *side_ref,
+                        stat: PokemonBoostableStat::Attack,
+                        amount: 1,
+                    }));
+            }
         }
         Abilities::SLOWSTART => {
             instructions
@@ -1654,15 +1672,31 @@ pub fn ability_on_switch_in(
             }
         }
         Abilities::DAUNTLESSSHIELD => {
-            // no need to check for boost at +6 because we are switching in
-            attacking_side.defense_boost += 1;
-            instructions
-                .instruction_list
-                .push(Instruction::Boost(BoostInstruction {
-                    side_ref: *side_ref,
-                    stat: PokemonBoostableStat::Defense,
-                    amount: 1,
-                }));
+            // Gen 9: only the first switch-in of the battle gets the boost
+            #[cfg(any(feature = "gen9", feature = "champions"))]
+            let first_time = !attacking_side.get_active_immutable().switch_in_boost_used;
+            #[cfg(not(any(feature = "gen9", feature = "champions")))]
+            let first_time = true;
+            if first_time {
+                #[cfg(any(feature = "gen9", feature = "champions"))]
+                {
+                    attacking_side.get_active().switch_in_boost_used = true;
+                    instructions
+                        .instruction_list
+                        .push(Instruction::ToggleSwitchInBoostUsed(
+                            ToggleSwitchInBoostUsedInstruction { side_ref: *side_ref },
+                        ));
+                }
+                // no need to check for boost at +6 because we are switching in
+                attacking_side.defense_boost += 1;
+                instructions
+                    .instruction_list
+                    .push(Instruction::Boost(BoostInstruction {
+                        side_ref: *side_ref,
+                        stat: PokemonBoostableStat::Defense,
+                        amount: 1,
+                    }));
+            }
         }
         Abilities::GRASSYSURGE => {
             if state.terrain.terrain_type != Terrain::GRASSYTERRAIN {
@@ -2392,6 +2426,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                     target: MoveTarget::Opponent,
                 });
@@ -2423,6 +2458,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 6,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 });
             }
@@ -2439,6 +2475,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 });
             }
@@ -2461,6 +2498,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 2,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 });
             }
@@ -2478,6 +2516,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 });
             }
@@ -2501,6 +2540,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                     target: MoveTarget::Opponent,
                 });
@@ -2569,6 +2609,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 })
             }
@@ -2586,6 +2627,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 1,
                         accuracy: 0,
+                        evasion: 0,
                     },
                     target: MoveTarget::Opponent,
                 });
@@ -2605,6 +2647,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                     target: MoveTarget::Opponent,
                 });
@@ -2676,6 +2719,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                     target: MoveTarget::Opponent,
                 });
@@ -2739,6 +2783,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: -1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 })
             }
@@ -2776,6 +2821,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                     target: MoveTarget::Opponent,
                 });
@@ -2794,6 +2840,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 });
             }
@@ -2810,6 +2857,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 })
             }
@@ -2923,6 +2971,7 @@ pub fn ability_modify_attack_against(
                         special_defense: 0,
                         speed: 1,
                         accuracy: 0,
+                        evasion: 0,
                     }),
                 });
             }

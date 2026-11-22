@@ -5,6 +5,7 @@ use super::items::{get_choice_move_disable_instructions, Items};
 use super::state::{PokemonVolatileStatus, Terrain, Weather};
 use crate::choices::{
     Boost, Choice, Choices, Effect, Heal, MoveCategory, MoveTarget, Secondary, StatBoosts,
+    VolatileStatus,
 };
 use crate::instruction::{
     ApplyVolatileStatusInstruction, BoostInstruction, ChangeItemInstruction,
@@ -54,6 +55,30 @@ pub fn modify_choice(
 ) {
     let (attacking_side, defending_side) = state.get_both_sides_immutable(attacking_side_ref);
     match attacker_choice.move_id {
+        // Non-Ghost: +1 Atk, +1 Def, -1 Spe on the user.
+        // Ghost (incl. Tera Ghost): the user loses 1/2 max HP and curses the target.
+        Choices::CURSE => {
+            if attacking_side.get_active_immutable().has_type(&PokemonType::GHOST) {
+                attacker_choice.boost = None;
+                if defending_side
+                    .volatile_statuses
+                    .contains(&PokemonVolatileStatus::CURSE)
+                {
+                    attacker_choice.volatile_status = None; // fails, no HP cost
+                } else {
+                    attacker_choice.volatile_status = Some(VolatileStatus {
+                        target: MoveTarget::Opponent,
+                        volatile_status: PokemonVolatileStatus::CURSE,
+                    });
+                    attacker_choice.heal = Some(Heal {
+                        target: MoveTarget::User,
+                        amount: -0.5,
+                    });
+                }
+            } else {
+                attacker_choice.volatile_status = None;
+            }
+        }
         Choices::ROOST => {
             let attacker = attacking_side.get_active_immutable();
             if attacker.hp == attacker.maxhp {
@@ -212,6 +237,7 @@ pub fn modify_choice(
                         special_defense: 1,
                         speed: 1,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 });
             }
@@ -237,6 +263,7 @@ pub fn modify_choice(
                         special_defense: 0,
                         speed: 2,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 });
             }
@@ -261,6 +288,7 @@ pub fn modify_choice(
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 });
             }
@@ -373,6 +401,7 @@ pub fn modify_choice(
                     special_defense: 0,
                     speed: 0,
                     accuracy: 0,
+                    evasion: 0,
                 },
             });
             if defending_side.attack_boost != -6 {
@@ -413,6 +442,7 @@ pub fn modify_choice(
                             special_defense: 0,
                             speed: 0,
                             accuracy: 0,
+                            evasion: 0,
                         }),
                     })
                 }
@@ -1131,18 +1161,30 @@ pub fn choice_hazard_clear(
                 state.terrain.terrain_type = Terrain::NONE;
                 state.terrain.turns_remaining = 0;
             }
-            let side_condition_clears = [
+            // Hazards are cleared from both sides; screens, Safeguard and Mist only from
+            // the target's side (Showdown: removeTarget vs removeAll)
+            let hazards = [
                 PokemonSideCondition::Stealthrock,
                 PokemonSideCondition::Spikes,
                 PokemonSideCondition::ToxicSpikes,
                 PokemonSideCondition::StickyWeb,
+            ];
+            let target_only = [
                 PokemonSideCondition::Reflect,
                 PokemonSideCondition::LightScreen,
                 PokemonSideCondition::AuroraVeil,
+                PokemonSideCondition::Safeguard,
+                PokemonSideCondition::Mist,
             ];
+            let target_side = attacking_side_ref.get_other_side();
 
             for side in [SideReference::SideOne, SideReference::SideTwo] {
-                for side_condition in side_condition_clears {
+                let clears: Vec<PokemonSideCondition> = if side == target_side {
+                    hazards.iter().chain(target_only.iter()).copied().collect()
+                } else {
+                    hazards.to_vec()
+                };
+                for side_condition in clears {
                     let side_condition_num = state
                         .get_side_immutable(&side)
                         .get_side_condition(side_condition);

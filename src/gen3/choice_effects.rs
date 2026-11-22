@@ -56,6 +56,7 @@ pub fn modify_choice(
                         special_defense: 0,
                         speed: 0,
                         accuracy: 0,
+                        evasion: 0,
                     },
                 });
             }

@@ -607,6 +607,7 @@ pub struct PyPokemon {
     pub terastallized: bool,
     pub tera_type: String,
     pub moves: Vec<PyMove>,
+    pub switch_in_boost_used: bool,
 }
 
 impl From<Pokemon> for PyPokemon {
@@ -644,6 +645,7 @@ impl From<Pokemon> for PyPokemon {
             weight_kg: other.weight_kg,
             mega_evolved: other.mega_evolved,
             terastallized: other.terastallized,
+            switch_in_boost_used: other.switch_in_boost_used,
             tera_type: other.tera_type.to_string(),
             moves: other
                 .moves
@@ -691,6 +693,7 @@ impl Into<Pokemon> for PyPokemon {
             weight_kg: self.weight_kg,
             mega_evolved: self.mega_evolved,
             terastallized: self.terastallized,
+            switch_in_boost_used: self.switch_in_boost_used,
             tera_type: PokemonType::from_str(&self.tera_type).unwrap(),
             moves: PokemonMoves {
                 m0: moves_vec[0].clone().into(),
@@ -730,6 +733,7 @@ impl PyPokemon {
         mega_evolved=false,
         terastallized=false,
         tera_type="typeless".to_string(),
+        switch_in_boost_used=false,
     ))]
     fn new(
         id: String,
@@ -756,6 +760,7 @@ impl PyPokemon {
         mega_evolved: bool,
         terastallized: bool,
         tera_type: String,
+        switch_in_boost_used: bool,
     ) -> Self {
         if base_ability == "" {
             base_ability = ability.clone();
@@ -785,6 +790,7 @@ impl PyPokemon {
             terastallized,
             tera_type,
             moves,
+            switch_in_boost_used,
         }
     }
     #[staticmethod]
