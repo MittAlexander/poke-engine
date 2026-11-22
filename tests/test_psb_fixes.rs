@@ -503,3 +503,44 @@ fn test_charge_ends_after_an_electric_move() {
     let b = outcomes(&state, Choices::THUNDERSHOCK, Choices::SPLASH);
     assert!(always(&b, |s| !s.side_one.volatile_statuses.contains(&PokemonVolatileStatus::CHARGE)));
 }
+
+// ------------------------------------------------------------------ Disable / Cursed Body
+
+#[test]
+fn test_cursed_body_disables_the_move_30_percent() {
+    let mut state = State::default();
+    state.side_two.get_active().ability = Abilities::CURSEDBODY;
+    let b = outcomes(&state, Choices::TACKLE, Choices::SPLASH);
+    let disabled: f32 = b.iter()
+        .filter(|(_, s)| s.side_one.volatile_statuses.contains(&PokemonVolatileStatus::DISABLE)
+            && s.side_one.get_active_immutable().moves[&PokemonMoveIndex::M0].disabled)
+        .map(|(p, _)| p).sum();
+    assert!((disabled - 30.0).abs() < 0.01, "disabled {}", disabled);
+}
+
+#[test]
+fn test_disable_expires_and_reenables_the_move() {
+    let mut state = State::default();
+    state.side_two.get_active().ability = Abilities::CURSEDBODY;
+    let b = outcomes(&state, Choices::TACKLE, Choices::SPLASH);
+    let (_, mut s) = b.into_iter()
+        .find(|(_, s)| s.side_one.volatile_statuses.contains(&PokemonVolatileStatus::DISABLE)).unwrap();
+    s.side_two.get_active().ability = Abilities::NONE;
+    // 6 end-of-turns in total (the attacker had already moved); one has passed
+    for turn in 0..5 {
+        assert!(s.side_one.get_active_immutable().moves[&PokemonMoveIndex::M0].disabled, "turn {}", turn);
+        let next = outcomes(&s, Choices::SPLASH, Choices::SPLASH);
+        s = next[0].1.clone();
+        // outcomes() replaces move 0; keep it disabled-aware by checking the flag only
+    }
+    assert!(!s.side_one.volatile_statuses.contains(&PokemonVolatileStatus::DISABLE));
+}
+
+#[test]
+fn test_disable_counter_survives_serialization() {
+    let mut state = State::default();
+    state.side_one.volatile_status_durations.disable = 5 * 4 + 2;
+    let s2 = State::deserialize(&state.serialize());
+    assert_eq!(s2.side_one.volatile_status_durations.disable_ticks(), 5);
+    assert_eq!(s2.side_one.volatile_status_durations.disable_move_index(), PokemonMoveIndex::M2);
+}

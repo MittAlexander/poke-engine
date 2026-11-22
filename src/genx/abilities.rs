@@ -2611,6 +2611,21 @@ pub fn ability_modify_attack_against(
                 });
             }
         }
+        // Cursed Body: 30% to disable the move that hit it
+        Abilities::CURSEDBODY => {
+            if attacker_choice.category != MoveCategory::Status
+                && attacker_choice.move_id != Choices::STRUGGLE
+                && !attacking_side
+                    .volatile_statuses
+                    .contains(&PokemonVolatileStatus::DISABLE)
+            {
+                attacker_choice.add_or_create_secondaries(Secondary {
+                    chance: 30.0,
+                    target: MoveTarget::User,
+                    effect: Effect::VolatileStatus(PokemonVolatileStatus::DISABLE),
+                });
+            }
+        }
         Abilities::FLAMEBODY => {
             if attacker_choice.flags.contact {
                 attacker_choice.add_or_create_secondaries(Secondary {

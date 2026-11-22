@@ -795,6 +795,9 @@ pub struct VolatileStatusDurations {
     pub healblock: i8,
     /// turns elapsed under Throat Chop (removed after 2 end-of-turns)
     pub throatchop: i8,
+    /// Disable, packed as `remaining_end_of_turns * 4 + disabled_move_index`
+    /// (see disable_ticks / disable_move_index)
+    pub disable: i8,
 }
 
 impl Default for VolatileStatusDurations {
@@ -808,6 +811,7 @@ impl Default for VolatileStatusDurations {
             yawn: 0,
             healblock: 0,
             throatchop: 0,
+            disable: 0,
         }
     }
 }
@@ -823,6 +827,7 @@ impl VolatileStatusDurations {
             ("yawn", self.yawn),
             ("healblock", self.healblock),
             ("throatchop", self.throatchop),
+            ("disable", self.disable),
         ];
 
         let mut output = String::new();
@@ -839,7 +844,7 @@ impl VolatileStatusDurations {
 
     pub fn serialize(&self) -> String {
         format!(
-            "{};{};{};{};{};{};{};{}",
+            "{};{};{};{};{};{};{};{};{}",
             self.confusion,
             self.encore,
             self.lockedmove,
@@ -847,7 +852,8 @@ impl VolatileStatusDurations {
             self.taunt,
             self.yawn,
             self.healblock,
-            self.throatchop
+            self.throatchop,
+            self.disable
         )
     }
     pub fn deserialize(serialized: &str) -> VolatileStatusDurations {
@@ -862,6 +868,20 @@ impl VolatileStatusDurations {
             // optional trailing field: older state strings omit it
             healblock: split.get(6).map_or(0, |v| v.parse::<i8>().unwrap_or(0)),
             throatchop: split.get(7).map_or(0, |v| v.parse::<i8>().unwrap_or(0)),
+            disable: split.get(8).map_or(0, |v| v.parse::<i8>().unwrap_or(0)),
+        }
+    }
+
+    pub fn disable_ticks(&self) -> i8 {
+        self.disable / 4
+    }
+
+    pub fn disable_move_index(&self) -> PokemonMoveIndex {
+        match self.disable % 4 {
+            0 => PokemonMoveIndex::M0,
+            1 => PokemonMoveIndex::M1,
+            2 => PokemonMoveIndex::M2,
+            _ => PokemonMoveIndex::M3,
         }
     }
 
@@ -1679,6 +1699,9 @@ impl State {
             }
             PokemonVolatileStatus::THROATCHOP => {
                 side.volatile_status_durations.throatchop += amount;
+            }
+            PokemonVolatileStatus::DISABLE => {
+                side.volatile_status_durations.disable += amount;
             }
             _ => panic!(
                 "Invalid volatile status for increment_volatile_status_duration: {:?}",

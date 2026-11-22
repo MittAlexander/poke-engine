@@ -22,7 +22,8 @@ use crate::instruction::{
     ToggleShedTailingInstruction, ToggleTrickRoomInstruction,
 };
 use crate::instruction::{
-    ChangeAbilityInstruction, SetLastBerryInstruction, ToggleTerastallizedInstruction,
+    ChangeAbilityInstruction, DisableMoveInstruction, EnableMoveInstruction,
+    SetLastBerryInstruction, ToggleTerastallizedInstruction,
 };
 use crate::instruction::{DecrementFutureSightInstruction, FormeChangeInstruction};
 use crate::instruction::{DecrementPPInstruction, SetLastUsedMoveInstruction};
@@ -696,6 +697,29 @@ fn get_instructions_from_volatile_statuses(
     {
         return;
     }
+    // Disable needs a move to disable: the attacker's own move for Cursed Body (target
+    // User), otherwise the target's last used move. It lasts 5 end-of-turns, 6 if the
+    // target already moved this turn (Showdown: duration++ when !willMove).
+    let mut disable_target: Option<(PokemonMoveIndex, i8)> = None;
+    if volatile_status.volatile_status == PokemonVolatileStatus::DISABLE {
+        let target = state.get_side_immutable(&target_side);
+        disable_target = match volatile_status.target {
+            MoveTarget::User => Some((attacker_choice.move_index, 6)),
+            MoveTarget::Opponent => match target.last_used_move {
+                LastUsedMove::Move(idx) => {
+                    Some((idx, if attacker_choice.first_move { 5 } else { 6 }))
+                }
+                _ => None,
+            },
+        };
+        match disable_target {
+            Some((idx, _))
+                if target.get_active_immutable().moves[&idx].id != Choices::STRUGGLE
+                    && target.get_active_immutable().moves[&idx].id != Choices::NONE => {}
+            _ => return,
+        }
+    }
+
     let side = state.get_side(&target_side);
     let affected_pkmn = side.get_active_immutable();
     if affected_pkmn.volatile_status_can_be_applied(
@@ -711,6 +735,29 @@ fn get_instructions_from_volatile_statuses(
         side.volatile_statuses
             .insert(volatile_status.volatile_status);
         incoming_instructions.instruction_list.push(ins);
+
+        if let Some((idx, ticks)) = disable_target {
+            let packed = ticks * 4 + idx as i8;
+            incoming_instructions
+                .instruction_list
+                .push(Instruction::ChangeVolatileStatusDuration(
+                    ChangeVolatileStatusDurationInstruction {
+                        side_ref: target_side,
+                        volatile_status: PokemonVolatileStatus::DISABLE,
+                        amount: packed - side.volatile_status_durations.disable,
+                    },
+                ));
+            side.volatile_status_durations.disable = packed;
+            if !side.get_active_immutable().moves[&idx].disabled {
+                side.get_active().moves[&idx].disabled = true;
+                incoming_instructions
+                    .instruction_list
+                    .push(Instruction::DisableMove(DisableMoveInstruction {
+                        side_ref: target_side,
+                        move_index: idx,
+                    }));
+            }
+        }
     }
 }
 
@@ -3449,6 +3496,57 @@ fn add_end_of_turn_instructions(
                     "Yawn duration cannot be {} when yawn volatile is active",
                     side.volatile_status_durations.yawn
                 ),
+            }
+        }
+
+        // Disable counts down every end of turn; when it ends the disabled move is usable again
+        if side
+            .volatile_statuses
+            .contains(&PokemonVolatileStatus::DISABLE)
+            && side.volatile_status_durations.disable_ticks() > 0
+        {
+            if side.volatile_status_durations.disable_ticks() > 1 {
+                incoming_instructions.instruction_list.push(
+                    Instruction::ChangeVolatileStatusDuration(
+                        ChangeVolatileStatusDurationInstruction {
+                            side_ref: *side_ref,
+                            volatile_status: PokemonVolatileStatus::DISABLE,
+                            amount: -4,
+                        },
+                    ),
+                );
+                side.volatile_status_durations.disable -= 4;
+            } else {
+                let idx = side.volatile_status_durations.disable_move_index();
+                side.volatile_statuses.remove(&PokemonVolatileStatus::DISABLE);
+                incoming_instructions
+                    .instruction_list
+                    .push(Instruction::RemoveVolatileStatus(
+                        RemoveVolatileStatusInstruction {
+                            side_ref: *side_ref,
+                            volatile_status: PokemonVolatileStatus::DISABLE,
+                        },
+                    ));
+                let packed = side.volatile_status_durations.disable;
+                incoming_instructions.instruction_list.push(
+                    Instruction::ChangeVolatileStatusDuration(
+                        ChangeVolatileStatusDurationInstruction {
+                            side_ref: *side_ref,
+                            volatile_status: PokemonVolatileStatus::DISABLE,
+                            amount: -packed,
+                        },
+                    ),
+                );
+                side.volatile_status_durations.disable = 0;
+                if side.get_active_immutable().moves[&idx].disabled {
+                    side.get_active().moves[&idx].disabled = false;
+                    incoming_instructions
+                        .instruction_list
+                        .push(Instruction::EnableMove(EnableMoveInstruction {
+                            side_ref: *side_ref,
+                            move_index: idx,
+                        }));
+                }
             }
         }
 
