@@ -110,10 +110,12 @@ fn test_ghost_curse_costs_half_hp_and_curses_target() {
 use poke_engine::engine::abilities::Abilities;
 use poke_engine::state::PokemonIndex;
 
+/// Side one switches to `to` on a normal turn while side two uses Splash.
 fn switch_outcomes(state: &State, to: PokemonIndex) -> Vec<(f32, State)> {
     let mut state = state.clone();
+    state.side_two.get_active().replace_move(PokemonMoveIndex::M0, Choices::SPLASH);
     let branches = generate_instructions_from_move_pair(
-        &mut state, &MoveChoice::Switch(to), &MoveChoice::None, false);
+        &mut state, &MoveChoice::Switch(to), &MoveChoice::Move(PokemonMoveIndex::M0), false);
     branches.into_iter().map(|b| {
         let mut s = state.clone();
         s.apply_instructions(&b.instruction_list);
@@ -154,4 +156,106 @@ fn test_switch_in_boost_flag_survives_serialization() {
     state.side_one.pokemon[PokemonIndex::P1].switch_in_boost_used = true;
     let s2 = State::deserialize(&state.serialize());
     assert!(s2.side_one.pokemon[PokemonIndex::P1].switch_in_boost_used);
+}
+
+// ------------------------------------------------------------------ Rest
+
+use poke_engine::state::PokemonStatus;
+
+#[test]
+fn test_rest_fails_at_full_hp() {
+    let state = State::default();
+    let b = outcomes(&state, Choices::REST, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_one.get_active_immutable().status == PokemonStatus::NONE));
+}
+
+#[test]
+fn test_rest_heals_and_cures_other_status() {
+    let mut state = State::default();
+    state.side_one.get_active().hp = 30;
+    state.side_one.get_active().status = PokemonStatus::BURN;
+    let b = outcomes(&state, Choices::REST, Choices::SPLASH);
+    assert!(always(&b, |s| {
+        let a = s.side_one.get_active_immutable();
+        a.status == PokemonStatus::SLEEP && a.hp == a.maxhp && a.rest_turns == 3
+    }));
+}
+
+#[test]
+fn test_rest_fails_with_insomnia() {
+    let mut state = State::default();
+    state.side_one.get_active().hp = 30;
+    state.side_one.get_active().ability = Abilities::INSOMNIA;
+    let b = outcomes(&state, Choices::REST, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_one.get_active_immutable().hp == 30));
+}
+
+// ------------------------------------------------------------------ Sitrus Berry timing
+
+use poke_engine::engine::items::Items;
+
+#[test]
+fn test_sitrus_eaten_right_after_hazard_damage_on_switch_in() {
+    let mut state = State::default();
+    state.side_one.side_conditions.stealth_rock = 1;
+    let incoming = &mut state.side_one.pokemon[PokemonIndex::P1];
+    incoming.item = Items::SITRUSBERRY;
+    incoming.hp = incoming.maxhp / 2 + 5; // rocks (1/8) take it below half
+    let b = switch_outcomes(&state, PokemonIndex::P1);
+    assert!(always(&b, |s| s.side_one.pokemon[PokemonIndex::P1].item == Items::NONE));
+}
+
+#[test]
+fn test_sitrus_eaten_mid_turn_before_end_of_turn() {
+    let mut state = State::default();
+    state.side_two.get_active().item = Items::SITRUSBERRY;
+    state.side_two.get_active().hp = 60;
+    // side one moves first (equal speed is a tie, so make it faster)
+    state.side_one.get_active().speed = 200;
+    let b = outcomes(&state, Choices::TACKLE, Choices::SPLASH);
+    // tackle takes it to <= 50%: the berry is gone in every branch that didn't faint
+    assert!(always(&b, |s| s.side_two.get_active_immutable().item == Items::NONE));
+}
+
+// ------------------------------------------------------------------ Speed Boost
+
+#[test]
+fn test_speed_boost_not_on_switch_in_turn() {
+    let mut state = State::default();
+    state.side_one.pokemon[PokemonIndex::P1].ability = Abilities::SPEEDBOOST;
+    state.set_conditional_mechanics(); // as State::deserialize and the bindings do
+    let b = switch_outcomes(&state, PokemonIndex::P1);
+    assert!(always(&b, |s| s.side_one.speed_boost == 0));
+}
+
+#[test]
+fn test_speed_boost_after_a_full_turn() {
+    let mut state = State::default();
+    state.side_one.get_active().ability = Abilities::SPEEDBOOST;
+    let b = outcomes(&state, Choices::SPLASH, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_one.speed_boost == 1));
+}
+
+
+// ------------------------------------------------------------------ Heal Block duration
+
+#[test]
+fn test_psychic_noise_heal_block_lasts_two_turns() {
+    let mut state = State::default();
+    state.side_one.get_active().speed = 200;
+    // turn 1: applied, survives the first end of turn
+    let b = outcomes(&state, Choices::PSYCHICNOISE, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_two.volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK)));
+    // turn 2: removed at the second end of turn
+    let after_one = b[0].1.clone();
+    let b2 = outcomes(&after_one, Choices::SPLASH, Choices::SPLASH);
+    assert!(always(&b2, |s| !s.side_two.volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK)
+        && s.side_two.volatile_status_durations.healblock == 0));
+}
+
+#[test]
+fn test_heal_block_timer_survives_serialization() {
+    let mut state = State::default();
+    state.side_two.volatile_status_durations.healblock = 1;
+    assert_eq!(State::deserialize(&state.serialize()).side_two.volatile_status_durations.healblock, 1);
 }

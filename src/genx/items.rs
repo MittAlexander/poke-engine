@@ -388,7 +388,7 @@ fn lum_berry(
     active_pkmn.item = Items::NONE;
 }
 
-fn sitrus_berry(
+pub fn sitrus_berry(
     side_ref: &SideReference,
     attacking_side: &mut Side,
     instructions: &mut StateInstructions,
@@ -1552,5 +1552,24 @@ pub fn item_modify_attack_being_used(
             }
         }
         _ => {}
+    }
+}
+
+/// HP berries are eaten as soon as HP drops to the threshold (Showdown runs its Update
+/// event after every action), not just before the holder moves or at the end of the turn.
+pub fn hp_berry_after_action(state: &mut State, side_ref: &SideReference, instructions: &mut StateInstructions) {
+    let opponent_unnerve = state
+        .get_side_immutable(&side_ref.get_other_side())
+        .get_active_immutable()
+        .ability
+        == Abilities::UNNERVE;
+    let side = state.get_side(side_ref);
+    let active = side.get_active_immutable();
+    if !opponent_unnerve
+        && active.item == Items::SITRUSBERRY
+        && active.hp > 0
+        && active.hp <= active.maxhp / 2
+    {
+        sitrus_berry(side_ref, side, instructions);
     }
 }

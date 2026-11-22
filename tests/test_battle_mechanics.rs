@@ -5435,10 +5435,7 @@ fn test_sitrus_berry_activate_after_taking_damage_when_faster() {
                 side_ref: SideReference::SideTwo,
                 damage_amount: 48,
             }),
-            Instruction::Damage(DamageInstruction {
-                side_ref: SideReference::SideOne,
-                damage_amount: 48,
-            }),
+            // at <= 50% after its own move, the berry is eaten before it is hit (Showdown Update after each action)
             Instruction::Heal(HealInstruction {
                 side_ref: SideReference::SideOne,
                 heal_amount: 25,
@@ -5447,6 +5444,10 @@ fn test_sitrus_berry_activate_after_taking_damage_when_faster() {
                 side_ref: SideReference::SideOne,
                 current_item: Items::SITRUSBERRY,
                 new_item: Items::NONE,
+            }),
+            Instruction::Damage(DamageInstruction {
+                side_ref: SideReference::SideOne,
+                damage_amount: 48,
             }),
         ],
     }];
@@ -20957,6 +20958,12 @@ fn test_healblock_prevents_drainpunch() {
                 side_ref: SideReference::SideOne,
                 volatile_status: PokemonVolatileStatus::HEALBLOCK,
             }),
+            // Psychic Noise's Heal Block ticks at the end of the turn (2-turn duration)
+            Instruction::ChangeVolatileStatusDuration(ChangeVolatileStatusDurationInstruction {
+                side_ref: SideReference::SideOne,
+                volatile_status: PokemonVolatileStatus::HEALBLOCK,
+                amount: 1,
+            }),
         ],
     }];
     assert_eq!(expected_instructions, vec_of_instructions);
@@ -20982,6 +20989,12 @@ fn test_healblock_prevents_synthesis() {
             Instruction::ApplyVolatileStatus(ApplyVolatileStatusInstruction {
                 side_ref: SideReference::SideOne,
                 volatile_status: PokemonVolatileStatus::HEALBLOCK,
+            }),
+            // Psychic Noise's Heal Block ticks at the end of the turn (2-turn duration)
+            Instruction::ChangeVolatileStatusDuration(ChangeVolatileStatusDurationInstruction {
+                side_ref: SideReference::SideOne,
+                volatile_status: PokemonVolatileStatus::HEALBLOCK,
+                amount: 1,
             }),
         ],
     }];
@@ -21012,6 +21025,12 @@ fn test_healblock_does_not_prevent_tackle() {
             Instruction::Damage(DamageInstruction {
                 side_ref: SideReference::SideTwo,
                 damage_amount: 48,
+            }),
+            // Psychic Noise's Heal Block ticks at the end of the turn (2-turn duration)
+            Instruction::ChangeVolatileStatusDuration(ChangeVolatileStatusDurationInstruction {
+                side_ref: SideReference::SideOne,
+                volatile_status: PokemonVolatileStatus::HEALBLOCK,
+                amount: 1,
             }),
         ],
     }];

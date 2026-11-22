@@ -1459,6 +1459,19 @@ impl State {
                     side.volatile_status_durations.taunt = 0;
                     false
                 }
+                PokemonVolatileStatus::HEALBLOCK => {
+                    if side.volatile_status_durations.healblock != 0 {
+                        instructions.push(Instruction::ChangeVolatileStatusDuration(
+                            ChangeVolatileStatusDurationInstruction {
+                                side_ref: *side_ref,
+                                volatile_status: *pkmn_volatile_status,
+                                amount: -1 * side.volatile_status_durations.healblock,
+                            },
+                        ));
+                        side.volatile_status_durations.healblock = 0;
+                    }
+                    false
+                }
                 _ => false,
             };
 
@@ -1543,6 +1556,17 @@ impl State {
         }
     }
 
+    fn _state_contains_any_ability(&self, abilities: &[Abilities]) -> bool {
+        for s in [&self.side_one, &self.side_two] {
+            for pkmn in s.pokemon.into_iter() {
+                if abilities.contains(&pkmn.ability) || abilities.contains(&pkmn.base_ability) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
     pub fn set_last_used_move_flag(&mut self) {
         if self._state_contains_any_move(&[
             Choices::ENCORE,
@@ -1550,7 +1574,10 @@ impl State {
             Choices::FIRSTIMPRESSION,
             Choices::BLOODMOON,
             Choices::GIGATONHAMMER,
-        ]) {
+        ])
+        // Speed Boost needs to know whether the holder switched in this turn
+        || self._state_contains_any_ability(&[Abilities::SPEEDBOOST])
+        {
             self.use_last_used_move = true
         }
     }

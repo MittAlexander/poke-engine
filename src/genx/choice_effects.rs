@@ -1466,11 +1466,31 @@ pub fn choice_special_effect(
             state.reset_boosts(&SideReference::SideTwo, &mut instructions.instruction_list);
         }
         Choices::REST => {
-            let electric_terrain_active = state.terrain_is_active(&Terrain::ELECTRICTERRAIN);
+            // Rest fails when already asleep, at full HP, or when sleep is blocked
+            // (abilities, Electric/Misty Terrain for a grounded user, Leaf Guard in sun).
+            // Unlike status moves it does cure an existing non-sleep status.
+            let sleep_blocking_terrain = state.terrain_is_active(&Terrain::ELECTRICTERRAIN)
+                || state.terrain_is_active(&Terrain::MISTYTERRAIN);
+            let sun = state.weather_is_active(&Weather::SUN)
+                || state.weather_is_active(&Weather::HARSHSUN);
             let attacking_side = state.get_side(attacking_side_ref);
             let active_index = attacking_side.active_index;
             let active_pkmn = attacking_side.get_active();
-            if active_pkmn.status != PokemonStatus::SLEEP && !electric_terrain_active {
+            let blocked = active_pkmn.status == PokemonStatus::SLEEP
+                || active_pkmn.hp >= active_pkmn.maxhp
+                || [
+                    Abilities::INSOMNIA,
+                    Abilities::VITALSPIRIT,
+                    Abilities::SWEETVEIL,
+                    Abilities::COMATOSE,
+                    Abilities::PURIFYINGSALT,
+                ]
+                .contains(&active_pkmn.ability)
+                || (active_pkmn.ability == Abilities::SHIELDSDOWN
+                    && active_pkmn.hp > active_pkmn.maxhp / 2)
+                || (active_pkmn.ability == Abilities::LEAFGUARD && sun)
+                || (sleep_blocking_terrain && active_pkmn.is_grounded());
+            if !blocked {
                 let heal_amount = active_pkmn.maxhp - active_pkmn.hp;
                 instructions
                     .instruction_list

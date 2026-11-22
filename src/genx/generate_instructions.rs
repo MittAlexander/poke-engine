@@ -28,7 +28,8 @@ use crate::instruction::{DecrementPPInstruction, SetLastUsedMoveInstruction};
 use super::damage_calc::calculate_futuresight_damage;
 use super::damage_calc::{calculate_damage, type_effectiveness_modifier, DamageRolls};
 use super::items::{
-    item_before_move, item_end_of_turn, item_modify_attack_against, item_modify_attack_being_used,
+    hp_berry_after_action, item_before_move, item_end_of_turn, item_modify_attack_against,
+    item_modify_attack_being_used,
     item_on_switch_in, Items,
 };
 use super::state::{MoveChoice, PokemonVolatileStatus, Terrain, Weather};
@@ -3403,6 +3404,46 @@ fn add_end_of_turn_instructions(
             }
         }
 
+        // Heal Block (Psychic Noise) lasts 2 turns: the turn it is applied and the next one
+        if side
+            .volatile_statuses
+            .contains(&PokemonVolatileStatus::HEALBLOCK)
+        {
+            if side.volatile_status_durations.healblock == 0 {
+                incoming_instructions.instruction_list.push(
+                    Instruction::ChangeVolatileStatusDuration(
+                        ChangeVolatileStatusDurationInstruction {
+                            side_ref: *side_ref,
+                            volatile_status: PokemonVolatileStatus::HEALBLOCK,
+                            amount: 1,
+                        },
+                    ),
+                );
+                side.volatile_status_durations.healblock += 1;
+            } else {
+                side.volatile_statuses.remove(&PokemonVolatileStatus::HEALBLOCK);
+                incoming_instructions
+                    .instruction_list
+                    .push(Instruction::RemoveVolatileStatus(
+                        RemoveVolatileStatusInstruction {
+                            side_ref: *side_ref,
+                            volatile_status: PokemonVolatileStatus::HEALBLOCK,
+                        },
+                    ));
+                let elapsed = side.volatile_status_durations.healblock;
+                incoming_instructions.instruction_list.push(
+                    Instruction::ChangeVolatileStatusDuration(
+                        ChangeVolatileStatusDurationInstruction {
+                            side_ref: *side_ref,
+                            volatile_status: PokemonVolatileStatus::HEALBLOCK,
+                            amount: -elapsed,
+                        },
+                    ),
+                );
+                side.volatile_status_durations.healblock = 0;
+            }
+        }
+
         if side
             .volatile_statuses
             .contains(&PokemonVolatileStatus::PERISH1)
@@ -3820,6 +3861,10 @@ fn run_move(
 fn after_move_finish(state: &mut State, final_instructions: &mut Vec<StateInstructions>) {
     for state_instructions in final_instructions.iter_mut() {
         state.apply_instructions(&state_instructions.instruction_list);
+
+        for side_ref in [SideReference::SideOne, SideReference::SideTwo] {
+            hp_berry_after_action(state, &side_ref, state_instructions);
+        }
 
         // check if anybody has negative boosts and a whiteherb
         // if so, consume the item and set the boosts to 0

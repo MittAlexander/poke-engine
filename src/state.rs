@@ -791,6 +791,8 @@ pub struct VolatileStatusDurations {
     pub slowstart: i8,
     pub taunt: i8,
     pub yawn: i8,
+    /// turns elapsed under Heal Block (Psychic Noise: removed after 2 end-of-turns)
+    pub healblock: i8,
 }
 
 impl Default for VolatileStatusDurations {
@@ -802,6 +804,7 @@ impl Default for VolatileStatusDurations {
             slowstart: 0,
             taunt: 0,
             yawn: 0,
+            healblock: 0,
         }
     }
 }
@@ -815,6 +818,7 @@ impl VolatileStatusDurations {
             ("slowstart", self.slowstart),
             ("taunt", self.taunt),
             ("yawn", self.yawn),
+            ("healblock", self.healblock),
         ];
 
         let mut output = String::new();
@@ -831,8 +835,14 @@ impl VolatileStatusDurations {
 
     pub fn serialize(&self) -> String {
         format!(
-            "{};{};{};{};{};{}",
-            self.confusion, self.encore, self.lockedmove, self.slowstart, self.taunt, self.yawn
+            "{};{};{};{};{};{};{}",
+            self.confusion,
+            self.encore,
+            self.lockedmove,
+            self.slowstart,
+            self.taunt,
+            self.yawn,
+            self.healblock
         )
     }
     pub fn deserialize(serialized: &str) -> VolatileStatusDurations {
@@ -844,6 +854,8 @@ impl VolatileStatusDurations {
             slowstart: split[3].parse::<i8>().unwrap(),
             taunt: split[4].parse::<i8>().unwrap(),
             yawn: split[5].parse::<i8>().unwrap(),
+            // optional trailing field: older state strings omit it
+            healblock: split.get(6).map_or(0, |v| v.parse::<i8>().unwrap_or(0)),
         }
     }
 }
@@ -1639,6 +1651,9 @@ impl State {
             }
             PokemonVolatileStatus::YAWN => {
                 side.volatile_status_durations.yawn += amount;
+            }
+            PokemonVolatileStatus::HEALBLOCK => {
+                side.volatile_status_durations.healblock += amount;
             }
             _ => panic!(
                 "Invalid volatile status for increment_volatile_status_duration: {:?}",
