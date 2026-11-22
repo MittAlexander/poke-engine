@@ -17,7 +17,6 @@ use crate::state::{
 };
 use std::cmp;
 
-#[cfg(feature = "gen4")]
 use super::state::PokemonVolatileStatus;
 
 define_enum_with_from_str! {
@@ -495,6 +494,7 @@ pub fn item_before_move(
     side_ref: &SideReference,
     instructions: &mut StateInstructions,
 ) {
+    let heal_blocked = state.get_side_immutable(side_ref).volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK);
     let (attacking_side, defending_side) = state.get_both_sides(side_ref);
     let active_pkmn = attacking_side.get_active();
     let defending_pkmn = defending_side.get_active();
@@ -789,11 +789,12 @@ pub fn item_before_move(
         }
         Items::SITRUSBERRY
             if active_pkmn.ability == Abilities::GLUTTONY
-                && active_pkmn.hp <= active_pkmn.maxhp / 2 =>
+                && active_pkmn.hp <= active_pkmn.maxhp / 2
+                && !heal_blocked =>
         {
             sitrus_berry(side_ref, attacking_side, instructions)
         }
-        Items::SITRUSBERRY if active_pkmn.hp <= active_pkmn.maxhp / 4 => {
+        Items::SITRUSBERRY if active_pkmn.hp <= active_pkmn.maxhp / 4 && !heal_blocked => {
             sitrus_berry(side_ref, attacking_side, instructions)
         }
         Items::ASPEARBERRY if active_pkmn.status == PokemonStatus::FREEZE => {
@@ -942,13 +943,15 @@ pub fn item_end_of_turn(
     side_ref: &SideReference,
     instructions: &mut StateInstructions,
 ) {
+    // Heal Block stops healing items; a Sitrus Berry isn't even eaten (Showdown onTryEatItem)
+    let heal_blocked = state.get_side_immutable(side_ref).volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK);
     let attacking_side = state.get_side(side_ref);
     let active_pkmn = attacking_side.get_active();
     match active_pkmn.item {
         Items::LUMBERRY if active_pkmn.status != PokemonStatus::NONE => {
             lum_berry(side_ref, attacking_side, instructions)
         }
-        Items::SITRUSBERRY if active_pkmn.hp <= active_pkmn.maxhp / 2 => {
+        Items::SITRUSBERRY if active_pkmn.hp <= active_pkmn.maxhp / 2 && !heal_blocked => {
             sitrus_berry(side_ref, attacking_side, instructions)
         }
         Items::ASPEARBERRY if active_pkmn.status == PokemonStatus::FREEZE => {
@@ -971,7 +974,7 @@ pub fn item_end_of_turn(
         }
         Items::BLACKSLUDGE => {
             if active_pkmn.has_type(&PokemonType::POISON) {
-                if active_pkmn.hp < active_pkmn.maxhp {
+                if active_pkmn.hp < active_pkmn.maxhp && !heal_blocked {
                     let heal_amount =
                         cmp::min(active_pkmn.maxhp / 16, active_pkmn.maxhp - active_pkmn.hp);
                     let ins = Instruction::Heal(HealInstruction {
@@ -1007,7 +1010,7 @@ pub fn item_end_of_turn(
         }
         Items::LEFTOVERS => {
             let attacker = state.get_side(side_ref).get_active();
-            if attacker.hp < attacker.maxhp {
+            if attacker.hp < attacker.maxhp && !heal_blocked {
                 let heal_amount = cmp::min(attacker.maxhp / 16, attacker.maxhp - attacker.hp);
                 let ins = Instruction::Heal(HealInstruction {
                     side_ref: side_ref.clone(),
@@ -1604,8 +1607,10 @@ pub fn hp_berry_after_action(state: &mut State, side_ref: &SideReference, instru
         .ability
         == Abilities::UNNERVE;
     let side = state.get_side(side_ref);
+    let heal_blocked = side.volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK);
     let active = side.get_active_immutable();
     if !opponent_unnerve
+        && !heal_blocked
         && active.item == Items::SITRUSBERRY
         && active.hp > 0
         && active.hp <= active.maxhp / 2

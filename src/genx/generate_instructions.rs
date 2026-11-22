@@ -1184,6 +1184,9 @@ fn get_instructions_from_heal(
         MoveTarget::User => target_side_ref = *attacking_side_reference,
     }
 
+    if heal.amount > 0.0 && state.get_side_immutable(&target_side_ref).volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK) {
+        return;
+    }
     let target_pkmn = state.get_side(&target_side_ref).get_active();
 
     let mut health_recovered = (heal.amount * target_pkmn.maxhp as f32) as i16;
@@ -1550,8 +1553,9 @@ fn generate_instructions_from_damage(
             }
         }
 
+        let drain_blocked = state.get_side_immutable(attacking_side_ref).volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK);
         let attacking_pokemon = state.get_side(attacking_side_ref).get_active();
-        if let Some(drain_fraction) = choice.drain {
+        if let Some(drain_fraction) = choice.drain.filter(|_| !drain_blocked) {
             let drain_amount = (damage_dealt as f32 * drain_fraction) as i16;
             let heal_amount =
                 cmp::min(drain_amount, attacking_pokemon.maxhp - attacking_pokemon.hp);
@@ -2941,8 +2945,9 @@ fn add_end_of_turn_instructions(
         if state.terrain.terrain_type == Terrain::GRASSYTERRAIN {
             for side_ref in sides {
                 let side = state.get_side(side_ref);
+                let heal_blocked = side.volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK);
                 let active_pkmn = side.get_active();
-                if active_pkmn.hp == 0 || !active_pkmn.is_grounded() {
+                if active_pkmn.hp == 0 || !active_pkmn.is_grounded() || heal_blocked {
                     continue;
                 }
                 let heal_amount = cmp::min(
@@ -3118,13 +3123,18 @@ fn add_end_of_turn_instructions(
     for side_ref in sides {
         let side = state.get_side(side_ref);
         let side_wish = side.wish;
+        let wish_blocked = side.volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK);
         let active_pkmn = side.get_active();
 
         if side_wish.0 > 0 {
             let decrement_wish_instruction = Instruction::DecrementWish(DecrementWishInstruction {
                 side_ref: *side_ref,
             });
-            if side_wish.0 == 1 && 0 < active_pkmn.hp && active_pkmn.hp < active_pkmn.maxhp {
+            if side_wish.0 == 1
+                && 0 < active_pkmn.hp
+                && active_pkmn.hp < active_pkmn.maxhp
+                && !wish_blocked
+            {
                 #[cfg(not(feature = "gen4"))]
                 let heal_amount = cmp::min(active_pkmn.maxhp - active_pkmn.hp, side_wish.1);
 
@@ -3249,6 +3259,10 @@ fn add_end_of_turn_instructions(
 
     // leechseed sap
     for side_ref in sides {
+        let seeder_heal_blocked = state
+            .get_side_immutable(&side_ref.get_other_side())
+            .volatile_statuses
+            .contains(&PokemonVolatileStatus::HEALBLOCK);
         let (leechseed_side, other_side) = state.get_both_sides(side_ref);
         if leechseed_side
             .volatile_statuses
@@ -3275,7 +3289,7 @@ fn add_end_of_turn_instructions(
                 health_sapped,
                 other_active_pkmn.maxhp - other_active_pkmn.hp,
             );
-            if health_recovered > 0 {
+            if health_recovered > 0 && !seeder_heal_blocked {
                 let heal_ins = Instruction::Heal(HealInstruction {
                     side_ref: side_ref.get_other_side(),
                     heal_amount: health_recovered,
@@ -4571,7 +4585,11 @@ fn harvest_outcomes(state: &State, side_ref: &SideReference) -> Vec<(f32, Vec<In
         .get_active_immutable()
         .ability
         == Abilities::UNNERVE;
-    if berry == Items::SITRUSBERRY && active.hp <= active.maxhp / 2 && !opponent_unnerve {
+    if berry == Items::SITRUSBERRY
+        && active.hp <= active.maxhp / 2
+        && !opponent_unnerve
+        && !side.volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK)
+    {
         regrow.push(Instruction::Heal(HealInstruction {
             side_ref: *side_ref,
             heal_amount: cmp::min(active.maxhp / 4, active.maxhp - active.hp),

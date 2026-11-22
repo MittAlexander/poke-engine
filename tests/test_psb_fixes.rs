@@ -420,3 +420,48 @@ fn test_unburden_not_active_when_entering_without_item() {
     let b = switch_outcomes(&state, PokemonIndex::P1);
     assert!(always(&b, |s| !s.side_one.volatile_statuses.contains(&PokemonVolatileStatus::UNBURDEN)));
 }
+
+// ------------------------------------------------------------------ Heal Block blocks every heal
+
+fn heal_blocked_state() -> State {
+    let mut state = State::default();
+    state.side_one.volatile_statuses.insert(PokemonVolatileStatus::HEALBLOCK);
+    state.side_one.get_active().hp = 50;
+    state
+}
+
+#[test]
+fn test_heal_block_stops_leftovers() {
+    let mut state = heal_blocked_state();
+    state.side_one.get_active().item = Items::LEFTOVERS;
+    let b = outcomes(&state, Choices::SPLASH, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_one.get_active_immutable().hp == 50));
+}
+
+#[test]
+fn test_heal_block_stops_sitrus_from_being_eaten() {
+    let mut state = heal_blocked_state();
+    state.side_one.get_active().item = Items::SITRUSBERRY;
+    let b = outcomes(&state, Choices::SPLASH, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_one.get_active_immutable().item == Items::SITRUSBERRY
+        && s.side_one.get_active_immutable().hp == 50));
+}
+
+#[test]
+fn test_heal_block_stops_drain() {
+    let mut state = heal_blocked_state();
+    state.side_two.get_active().types = (PokemonType::WATER, PokemonType::TYPELESS);
+    let b = outcomes(&state, Choices::GIGADRAIN, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_one.get_active_immutable().hp == 50));
+}
+
+#[test]
+fn test_ice_body_heals_in_snow() {
+    let mut state = State::default();
+    state.side_one.get_active().ability = Abilities::ICEBODY;
+    state.side_one.get_active().hp = 50;
+    state.weather.weather_type = poke_engine::engine::state::Weather::SNOW;
+    state.weather.turns_remaining = 3;
+    let b = outcomes(&state, Choices::SPLASH, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_one.get_active_immutable().hp > 50));
+}

@@ -1053,6 +1053,7 @@ pub fn ability_on_switch_out(
     side_ref: &SideReference,
     instructions: &mut StateInstructions,
 ) {
+    let heal_blocked = state.get_side_immutable(side_ref).volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK);
     let (attacking_side, defending_side) = state.get_both_sides(side_ref);
     let active_pkmn = attacking_side.get_active();
     if defending_side.get_active_immutable().ability == Abilities::NEUTRALIZINGGAS {
@@ -1110,7 +1111,7 @@ pub fn ability_on_switch_out(
         Abilities::REGENERATOR => {
             let hp_recovered = cmp::min(active_pkmn.maxhp / 3, active_pkmn.maxhp - active_pkmn.hp);
 
-            if hp_recovered > 0 && active_pkmn.hp > 0 {
+            if hp_recovered > 0 && active_pkmn.hp > 0 && !heal_blocked {
                 instructions
                     .instruction_list
                     .push(Instruction::Heal(HealInstruction {
@@ -1183,6 +1184,8 @@ pub fn ability_end_of_turn(
     side_ref: &SideReference,
     instructions: &mut StateInstructions,
 ) {
+    // Heal Block stops every heal (Showdown onTryHeal)
+    let heal_blocked = state.get_side_immutable(side_ref).volatile_statuses.contains(&PokemonVolatileStatus::HEALBLOCK);
     let (attacking_side, defending_side) = state.get_both_sides(side_ref);
     let active_pkmn = attacking_side.get_active();
     if defending_side.get_active_immutable().ability == Abilities::NEUTRALIZINGGAS {
@@ -1287,8 +1290,9 @@ pub fn ability_end_of_turn(
                 }
             }
         }
-        Abilities::ICEBODY => {
-            if state.weather_is_active(&Weather::HAIL) {
+        Abilities::ICEBODY if !heal_blocked => {
+            // Gen 9 replaced Hail with Snow; Ice Body heals in either
+            if state.weather_is_active(&Weather::HAIL) || state.weather_is_active(&Weather::SNOW) {
                 let active_pkmn = state.get_side(side_ref).get_active();
                 let health_recovered =
                     cmp::min(active_pkmn.maxhp / 16, active_pkmn.maxhp - active_pkmn.hp);
@@ -1303,7 +1307,8 @@ pub fn ability_end_of_turn(
                 }
             }
         }
-        Abilities::POISONHEAL => {
+        // Poison Heal still prevents poison damage while heal-blocked; it just doesn't heal
+        Abilities::POISONHEAL if !heal_blocked => {
             if active_pkmn.hp < active_pkmn.maxhp
                 && (active_pkmn.status == PokemonStatus::POISON
                     || active_pkmn.status == PokemonStatus::TOXIC)
@@ -1332,7 +1337,7 @@ pub fn ability_end_of_turn(
                 instructions.instruction_list.push(ins);
             }
         }
-        Abilities::RAINDISH => {
+        Abilities::RAINDISH if !heal_blocked => {
             if state.weather_is_active(&Weather::RAIN)
                 || state.weather_is_active(&Weather::HEAVYRAIN)
             {
@@ -1351,7 +1356,7 @@ pub fn ability_end_of_turn(
             }
         }
         Abilities::DRYSKIN => {
-            if state.weather_is_active(&Weather::RAIN) {
+            if state.weather_is_active(&Weather::RAIN) && !heal_blocked {
                 let active_pkmn = state.get_side(side_ref).get_active();
                 if active_pkmn.hp < active_pkmn.maxhp {
                     let heal_amount =
