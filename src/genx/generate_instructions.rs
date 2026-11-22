@@ -2552,7 +2552,10 @@ fn get_effective_speed(state: &State, side_reference: &SideReference) -> i16 {
             boosted_speed *= 2.0
         }
         Weather::SAND if active_pkmn.ability == Abilities::SANDRUSH => boosted_speed *= 2.0,
-        Weather::HAIL if active_pkmn.ability == Abilities::SLUSHRUSH => boosted_speed *= 2.0,
+        // Gen 9 replaced Hail with Snow; Slush Rush works in either
+        Weather::HAIL | Weather::SNOW if active_pkmn.ability == Abilities::SLUSHRUSH => {
+            boosted_speed *= 2.0
+        }
         _ => {}
     }
 
@@ -2561,9 +2564,10 @@ fn get_effective_speed(state: &State, side_reference: &SideReference) -> i16 {
             boosted_speed *= 2.0
         }
         Abilities::UNBURDEN
-            if side
-                .volatile_statuses
-                .contains(&PokemonVolatileStatus::UNBURDEN) =>
+            if active_pkmn.item == Items::NONE
+                && side
+                    .volatile_statuses
+                    .contains(&PokemonVolatileStatus::UNBURDEN) =>
         {
             boosted_speed *= 2.0
         }
@@ -3432,43 +3436,53 @@ fn add_end_of_turn_instructions(
             }
         }
 
-        // Heal Block (Psychic Noise) lasts 2 turns: the turn it is applied and the next one
-        if side
-            .volatile_statuses
-            .contains(&PokemonVolatileStatus::HEALBLOCK)
-        {
-            if side.volatile_status_durations.healblock == 0 {
+        // Heal Block (Psychic Noise) and Throat Chop last 2 turns: the turn they are
+        // applied and the next one
+        for volatile in [PokemonVolatileStatus::HEALBLOCK, PokemonVolatileStatus::THROATCHOP] {
+            if !side.volatile_statuses.contains(&volatile) {
+                continue;
+            }
+            let elapsed = *side
+                .volatile_status_durations
+                .two_turn_counter(&volatile)
+                .unwrap();
+            if elapsed == 0 {
                 incoming_instructions.instruction_list.push(
                     Instruction::ChangeVolatileStatusDuration(
                         ChangeVolatileStatusDurationInstruction {
                             side_ref: *side_ref,
-                            volatile_status: PokemonVolatileStatus::HEALBLOCK,
+                            volatile_status: volatile,
                             amount: 1,
                         },
                     ),
                 );
-                side.volatile_status_durations.healblock += 1;
+                *side
+                    .volatile_status_durations
+                    .two_turn_counter(&volatile)
+                    .unwrap() += 1;
             } else {
-                side.volatile_statuses.remove(&PokemonVolatileStatus::HEALBLOCK);
+                side.volatile_statuses.remove(&volatile);
                 incoming_instructions
                     .instruction_list
                     .push(Instruction::RemoveVolatileStatus(
                         RemoveVolatileStatusInstruction {
                             side_ref: *side_ref,
-                            volatile_status: PokemonVolatileStatus::HEALBLOCK,
+                            volatile_status: volatile,
                         },
                     ));
-                let elapsed = side.volatile_status_durations.healblock;
                 incoming_instructions.instruction_list.push(
                     Instruction::ChangeVolatileStatusDuration(
                         ChangeVolatileStatusDurationInstruction {
                             side_ref: *side_ref,
-                            volatile_status: PokemonVolatileStatus::HEALBLOCK,
+                            volatile_status: volatile,
                             amount: -elapsed,
                         },
                     ),
                 );
-                side.volatile_status_durations.healblock = 0;
+                *side
+                    .volatile_status_durations
+                    .two_turn_counter(&volatile)
+                    .unwrap() = 0;
             }
         }
 
@@ -3886,6 +3900,41 @@ fn run_move(
     }
 }
 
+/// Unburden activates when its holder loses its item (consumed, knocked off, stolen),
+/// not when it entered battle without one: look for an item loss on this side since
+/// its last switch-in. `state` must have `state_instructions` applied.
+fn apply_unburden(state: &mut State, state_instructions: &mut StateInstructions) {
+    for side_ref in [SideReference::SideOne, SideReference::SideTwo] {
+        let side = state.get_side(&side_ref);
+        if side.get_active_immutable().ability != Abilities::UNBURDEN
+            || side.volatile_statuses.contains(&PokemonVolatileStatus::UNBURDEN)
+        {
+            continue;
+        }
+        let mut lost_item = false;
+        for ins in state_instructions.instruction_list.iter() {
+            match ins {
+                Instruction::Switch(s) if s.side_ref == side_ref => lost_item = false,
+                Instruction::ChangeItem(c)
+                    if c.side_ref == side_ref && c.current_item != Items::NONE =>
+                {
+                    lost_item = true
+                }
+                _ => {}
+            }
+        }
+        if lost_item {
+            side.volatile_statuses.insert(PokemonVolatileStatus::UNBURDEN);
+            state_instructions
+                .instruction_list
+                .push(Instruction::ApplyVolatileStatus(ApplyVolatileStatusInstruction {
+                    side_ref,
+                    volatile_status: PokemonVolatileStatus::UNBURDEN,
+                }));
+        }
+    }
+}
+
 fn after_move_finish(state: &mut State, final_instructions: &mut Vec<StateInstructions>) {
     for state_instructions in final_instructions.iter_mut() {
         state.apply_instructions(&state_instructions.instruction_list);
@@ -3893,6 +3942,7 @@ fn after_move_finish(state: &mut State, final_instructions: &mut Vec<StateInstru
         for side_ref in [SideReference::SideOne, SideReference::SideTwo] {
             hp_berry_after_action(state, &side_ref, state_instructions);
         }
+        apply_unburden(state, state_instructions);
 
         // check if anybody has negative boosts and a whiteherb
         // if so, consume the item and set the boosts to 0
@@ -4451,8 +4501,11 @@ fn end_of_turn_chance_effects(
     branches: Vec<StateInstructions>,
 ) -> Vec<StateInstructions> {
     let mut out = Vec::with_capacity(branches.len());
-    for branch in branches {
+    for mut branch in branches {
         state.apply_instructions(&branch.instruction_list);
+        // items consumed during the end-of-turn phase (e.g. Sitrus, Lum) trigger Unburden;
+        // apply_unburden updates `state` along with the instructions it appends
+        apply_unburden(state, &mut branch);
         if state.side_one.force_switch || state.side_two.force_switch {
             state.reverse_instructions(&branch.instruction_list);
             out.push(branch);

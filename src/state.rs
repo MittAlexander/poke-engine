@@ -793,6 +793,8 @@ pub struct VolatileStatusDurations {
     pub yawn: i8,
     /// turns elapsed under Heal Block (Psychic Noise: removed after 2 end-of-turns)
     pub healblock: i8,
+    /// turns elapsed under Throat Chop (removed after 2 end-of-turns)
+    pub throatchop: i8,
 }
 
 impl Default for VolatileStatusDurations {
@@ -805,6 +807,7 @@ impl Default for VolatileStatusDurations {
             taunt: 0,
             yawn: 0,
             healblock: 0,
+            throatchop: 0,
         }
     }
 }
@@ -819,6 +822,7 @@ impl VolatileStatusDurations {
             ("taunt", self.taunt),
             ("yawn", self.yawn),
             ("healblock", self.healblock),
+            ("throatchop", self.throatchop),
         ];
 
         let mut output = String::new();
@@ -835,14 +839,15 @@ impl VolatileStatusDurations {
 
     pub fn serialize(&self) -> String {
         format!(
-            "{};{};{};{};{};{};{}",
+            "{};{};{};{};{};{};{};{}",
             self.confusion,
             self.encore,
             self.lockedmove,
             self.slowstart,
             self.taunt,
             self.yawn,
-            self.healblock
+            self.healblock,
+            self.throatchop
         )
     }
     pub fn deserialize(serialized: &str) -> VolatileStatusDurations {
@@ -856,6 +861,16 @@ impl VolatileStatusDurations {
             yawn: split[5].parse::<i8>().unwrap(),
             // optional trailing field: older state strings omit it
             healblock: split.get(6).map_or(0, |v| v.parse::<i8>().unwrap_or(0)),
+            throatchop: split.get(7).map_or(0, |v| v.parse::<i8>().unwrap_or(0)),
+        }
+    }
+
+    /// Elapsed-turn counter of the volatiles that last exactly two turns (applied turn + next).
+    pub fn two_turn_counter(&mut self, volatile: &PokemonVolatileStatus) -> Option<&mut i8> {
+        match volatile {
+            PokemonVolatileStatus::HEALBLOCK => Some(&mut self.healblock),
+            PokemonVolatileStatus::THROATCHOP => Some(&mut self.throatchop),
+            _ => None,
         }
     }
 }
@@ -1661,6 +1676,9 @@ impl State {
             }
             PokemonVolatileStatus::HEALBLOCK => {
                 side.volatile_status_durations.healblock += amount;
+            }
+            PokemonVolatileStatus::THROATCHOP => {
+                side.volatile_status_durations.throatchop += amount;
             }
             _ => panic!(
                 "Invalid volatile status for increment_volatile_status_duration: {:?}",

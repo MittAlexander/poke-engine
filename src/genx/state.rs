@@ -1459,16 +1459,20 @@ impl State {
                     side.volatile_status_durations.taunt = 0;
                     false
                 }
-                PokemonVolatileStatus::HEALBLOCK => {
-                    if side.volatile_status_durations.healblock != 0 {
+                PokemonVolatileStatus::HEALBLOCK | PokemonVolatileStatus::THROATCHOP => {
+                    let counter = side
+                        .volatile_status_durations
+                        .two_turn_counter(pkmn_volatile_status)
+                        .unwrap();
+                    if *counter != 0 {
                         instructions.push(Instruction::ChangeVolatileStatusDuration(
                             ChangeVolatileStatusDurationInstruction {
                                 side_ref: *side_ref,
                                 volatile_status: *pkmn_volatile_status,
-                                amount: -1 * side.volatile_status_durations.healblock,
+                                amount: -1 * *counter,
                             },
                         ));
-                        side.volatile_status_durations.healblock = 0;
+                        *counter = 0;
                     }
                     false
                 }

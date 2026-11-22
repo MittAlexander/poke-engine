@@ -20760,6 +20760,8 @@ pub struct Choice {
 
     pub first_move: bool,
     pub sleep_talk_move: bool,
+    /// set when Sheer Force removed this move's secondary effects (Life Orb then has no recoil)
+    pub sheer_force_boosted: bool,
 }
 
 impl fmt::Debug for Choice {
@@ -20889,6 +20891,7 @@ impl Default for Choice {
             target: MoveTarget::Opponent,
             first_move: true,
             sleep_talk_move: false,
+            sheer_force_boosted: false,
         }
     }
 }

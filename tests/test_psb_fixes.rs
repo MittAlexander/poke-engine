@@ -364,3 +364,59 @@ fn test_anchor_shot_traps_target() {
     let b = outcomes(&State::default(), Choices::ANCHORSHOT, Choices::SPLASH);
     assert!(always(&b, |s| s.side_two.volatile_statuses.contains(&PokemonVolatileStatus::TRAPPED)));
 }
+
+#[test]
+fn test_throat_chop_lasts_two_turns() {
+    let mut state = State::default();
+    state.side_two.get_active().types = (PokemonType::WATER, PokemonType::TYPELESS);
+    state.side_one.get_active().speed = 200;
+    let b = outcomes(&state, Choices::THROATCHOP, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_two.volatile_statuses.contains(&PokemonVolatileStatus::THROATCHOP)));
+    let b2 = outcomes(&b[0].1, Choices::SPLASH, Choices::SPLASH);
+    assert!(always(&b2, |s| !s.side_two.volatile_statuses.contains(&PokemonVolatileStatus::THROATCHOP)));
+}
+
+// ------------------------------------------------------------------ Sheer Force + Life Orb
+
+#[test]
+fn test_sheer_force_life_orb_has_no_recoil_when_boosted() {
+    let mut state = State::default();
+    state.side_one.get_active().ability = Abilities::SHEERFORCE;
+    state.side_one.get_active().item = Items::LIFEORB;
+    let maxhp = state.side_one.get_active().maxhp;
+    // Fire Punch has a burn secondary, so Sheer Force applies
+    let b = outcomes(&state, Choices::FIREPUNCH, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_one.get_active_immutable().hp == maxhp));
+}
+
+#[test]
+fn test_sheer_force_life_orb_recoil_without_secondaries() {
+    let mut state = State::default();
+    state.side_one.get_active().ability = Abilities::SHEERFORCE;
+    state.side_one.get_active().item = Items::LIFEORB;
+    let maxhp = state.side_one.get_active().maxhp;
+    let b = outcomes(&state, Choices::TACKLE, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_one.get_active_immutable().hp == maxhp - maxhp / 10));
+}
+
+// ------------------------------------------------------------------ Unburden, Slush Rush
+
+#[test]
+fn test_unburden_activates_when_sitrus_is_eaten() {
+    let mut state = State::default();
+    state.side_two.get_active().ability = Abilities::UNBURDEN;
+    state.side_two.get_active().item = Items::SITRUSBERRY;
+    state.side_two.get_active().hp = 60;
+    state.side_one.get_active().speed = 200;
+    let b = outcomes(&state, Choices::TACKLE, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_two.volatile_statuses.contains(&PokemonVolatileStatus::UNBURDEN)));
+}
+
+#[test]
+fn test_unburden_not_active_when_entering_without_item() {
+    let mut state = State::default();
+    state.side_one.pokemon[PokemonIndex::P1].ability = Abilities::UNBURDEN;
+    state.side_one.pokemon[PokemonIndex::P1].item = Items::NONE;
+    let b = switch_outcomes(&state, PokemonIndex::P1);
+    assert!(always(&b, |s| !s.side_one.volatile_statuses.contains(&PokemonVolatileStatus::UNBURDEN)));
+}
