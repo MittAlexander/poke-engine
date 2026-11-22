@@ -471,12 +471,14 @@ fn generate_instructions_from_switch(
         let switched_in_pkmn = side.get_active_immutable();
         if side.side_conditions.sticky_web == 1 && switched_in_pkmn.is_grounded() {
             // a pkmn switching in doesn't have any other speed drops,
-            // so no need to check for going below -6
+            // so no need to check for going below -6.
+            // The drop comes from the opponent (the web setter): Clear Body & co. block it,
+            // Defiant / Competitive trigger.
             apply_boost_instruction(
                 side,
                 &PokemonBoostableStat::Speed,
                 &-1,
-                &switching_side_ref,
+                &switching_side_ref.get_other_side(),
                 &switching_side_ref,
                 incoming_instructions,
             );
@@ -3713,6 +3715,25 @@ fn run_move(
     defender_choice: &Choice,
     final_instructions: &mut Vec<StateInstructions>,
 ) {
+    // Charge ends once its holder uses an Electric move (its power was already doubled
+    // in the damage calculation)
+    if choice.move_type == PokemonType::ELECTRIC && choice.move_id != Choices::CHARGE {
+        let side = state.get_side(&attacking_side);
+        if side
+            .volatile_statuses
+            .contains(&PokemonVolatileStatus::CHARGE)
+        {
+            side.volatile_statuses.remove(&PokemonVolatileStatus::CHARGE);
+            instructions
+                .instruction_list
+                .push(Instruction::RemoveVolatileStatus(
+                    RemoveVolatileStatusInstruction {
+                        side_ref: attacking_side,
+                        volatile_status: PokemonVolatileStatus::CHARGE,
+                    },
+                ));
+        }
+    }
     let mut hit_sub = false;
     for _ in 0..hit_count {
         if does_damage {

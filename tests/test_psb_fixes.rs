@@ -465,3 +465,41 @@ fn test_ice_body_heals_in_snow() {
     let b = outcomes(&state, Choices::SPLASH, Choices::SPLASH);
     assert!(always(&b, |s| s.side_one.get_active_immutable().hp > 50));
 }
+
+// ------------------------------------------------------------------ Sticky Web is an opponent's drop
+
+#[test]
+fn test_sticky_web_blocked_by_clear_body() {
+    let mut state = State::default();
+    state.side_one.side_conditions.sticky_web = 1;
+    state.side_one.pokemon[PokemonIndex::P1].ability = Abilities::CLEARBODY;
+    let b = switch_outcomes(&state, PokemonIndex::P1);
+    assert!(always(&b, |s| s.side_one.speed_boost == 0));
+}
+
+#[test]
+fn test_sticky_web_triggers_competitive() {
+    let mut state = State::default();
+    state.side_one.side_conditions.sticky_web = 1;
+    state.side_one.pokemon[PokemonIndex::P1].ability = Abilities::COMPETITIVE;
+    let b = switch_outcomes(&state, PokemonIndex::P1);
+    assert!(always(&b, |s| s.side_one.speed_boost == -1 && s.side_one.special_attack_boost == 2));
+}
+
+// ------------------------------------------------------------------ Charge: Electromorphosis, removal
+
+#[test]
+fn test_electromorphosis_charges_when_hit() {
+    let mut state = State::default();
+    state.side_two.get_active().ability = Abilities::ELECTROMORPHOSIS;
+    let b = outcomes(&state, Choices::TACKLE, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_two.volatile_statuses.contains(&PokemonVolatileStatus::CHARGE)));
+}
+
+#[test]
+fn test_charge_ends_after_an_electric_move() {
+    let mut state = State::default();
+    state.side_one.volatile_statuses.insert(PokemonVolatileStatus::CHARGE);
+    let b = outcomes(&state, Choices::THUNDERSHOCK, Choices::SPLASH);
+    assert!(always(&b, |s| !s.side_one.volatile_statuses.contains(&PokemonVolatileStatus::CHARGE)));
+}

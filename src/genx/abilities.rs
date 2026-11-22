@@ -814,6 +814,7 @@ pub fn ability_after_damage_hit(
     }
     let (attacking_side, defending_side) = state.get_both_sides(side_ref);
     let attacking_pkmn = attacking_side.get_active();
+    let defender_charged = defending_side.volatile_statuses.contains(&PokemonVolatileStatus::CHARGE);
     let defending_pkmn = defending_side.get_active();
     match defending_pkmn.ability {
         Abilities::MUMMY | Abilities::LINGERINGAROMA | Abilities::WANDERINGSPIRIT => {
@@ -881,6 +882,26 @@ pub fn ability_after_damage_hit(
                 defending_pkmn.types = (choice.move_type, PokemonType::TYPELESS);
                 instructions.instruction_list.push(change_type_instruction);
             }
+        }
+        // Electromorphosis: hit by a damaging move. Wind Power: hit by a wind move.
+        // Either charges the holder (its next Electric move has doubled power).
+        Abilities::ELECTROMORPHOSIS | Abilities::WINDPOWER
+            if damage_dealt > 0
+                && defending_pkmn.hp != 0
+                && (defending_pkmn.ability == Abilities::ELECTROMORPHOSIS || choice.flags.wind)
+                && !defender_charged =>
+        {
+            defending_side
+                .volatile_statuses
+                .insert(PokemonVolatileStatus::CHARGE);
+            instructions
+                .instruction_list
+                .push(Instruction::ApplyVolatileStatus(
+                    ApplyVolatileStatusInstruction {
+                        side_ref: side_ref.get_other_side(),
+                        volatile_status: PokemonVolatileStatus::CHARGE,
+                    },
+                ));
         }
         Abilities::STAMINA => {
             if damage_dealt > 0 && defending_pkmn.hp != 0 {
