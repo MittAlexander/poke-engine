@@ -259,3 +259,108 @@ fn test_heal_block_timer_survives_serialization() {
     state.side_two.volatile_status_durations.healblock = 1;
     assert_eq!(State::deserialize(&state.serialize()).side_two.volatile_status_durations.healblock, 1);
 }
+
+// ------------------------------------------------------------------ double switch order
+
+#[test]
+fn test_double_switch_faster_side_switches_first() {
+    // side two is faster: its Intimidate user comes in first and hits side one's *outgoing*
+    // Pokemon, so side one's incoming Pokemon is unaffected
+    let mut state = State::default();
+    state.side_one.get_active().speed = 100;
+    state.side_two.get_active().speed = 200;
+    state.side_two.pokemon[PokemonIndex::P1].ability = Abilities::INTIMIDATE;
+    let mut s = state.clone();
+    let br = generate_instructions_from_move_pair(
+        &mut s, &MoveChoice::Switch(PokemonIndex::P1), &MoveChoice::Switch(PokemonIndex::P1), false);
+    for b in br {
+        let mut t = state.clone();
+        t.apply_instructions(&b.instruction_list);
+        assert_eq!(t.side_one.attack_boost, 0);
+    }
+}
+
+#[test]
+fn test_double_switch_slower_intimidate_hits_incoming() {
+    let mut state = State::default();
+    state.side_one.get_active().speed = 200;
+    state.side_two.get_active().speed = 100;
+    state.side_two.pokemon[PokemonIndex::P1].ability = Abilities::INTIMIDATE;
+    let mut s = state.clone();
+    let br = generate_instructions_from_move_pair(
+        &mut s, &MoveChoice::Switch(PokemonIndex::P1), &MoveChoice::Switch(PokemonIndex::P1), false);
+    for b in br {
+        let mut t = state.clone();
+        t.apply_instructions(&b.instruction_list);
+        assert_eq!(t.side_one.attack_boost, -1);
+    }
+}
+
+// ------------------------------------------------------------------ Harvest
+
+
+fn harvest_state() -> State {
+    let mut state = State::default();
+    let a = state.side_one.get_active();
+    a.ability = Abilities::HARVEST;
+    a.item = Items::NONE;
+    a.last_berry = Items::SITRUSBERRY;
+    a.hp = 90;
+    state
+}
+
+#[test]
+fn test_harvest_regrows_berry_half_the_time() {
+    let b = outcomes(&harvest_state(), Choices::SPLASH, Choices::SPLASH);
+    let regrown: f32 = b.iter().filter(|(_, s)| s.side_one.get_active_immutable().item == Items::SITRUSBERRY)
+        .map(|(p, _)| p).sum();
+    assert!((regrown - 50.0).abs() < 0.01, "regrown {}", regrown);
+}
+
+#[test]
+fn test_harvested_sitrus_is_eaten_again_at_half_hp() {
+    let mut state = harvest_state();
+    state.side_one.get_active().hp = 40;
+    let b = outcomes(&state, Choices::SPLASH, Choices::SPLASH);
+    // the regrow branch heals 25 and the berry is gone again, but remembered
+    assert!(b.iter().any(|(p, s)| (*p - 50.0).abs() < 0.01
+        && s.side_one.get_active_immutable().hp == 65
+        && s.side_one.get_active_immutable().item == Items::NONE
+        && s.side_one.get_active_immutable().last_berry == Items::SITRUSBERRY));
+}
+
+#[test]
+fn test_no_harvest_without_an_eaten_berry() {
+    let mut state = harvest_state();
+    state.side_one.get_active().last_berry = Items::NONE; // e.g. it was knocked off
+    let b = outcomes(&state, Choices::SPLASH, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_one.get_active_immutable().item == Items::NONE));
+}
+
+#[test]
+fn test_eating_sitrus_records_last_berry() {
+    let mut state = State::default();
+    state.side_two.get_active().ability = Abilities::HARVEST;
+    state.side_two.get_active().item = Items::SITRUSBERRY;
+    state.side_two.get_active().hp = 60;
+    state.side_one.get_active().speed = 200;
+    let b = outcomes(&state, Choices::TACKLE, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_two.get_active_immutable().last_berry == Items::SITRUSBERRY));
+}
+
+// ------------------------------------------------------------------ trapping moves
+
+#[test]
+fn test_spirit_shackle_traps_target() {
+    let mut state = State::default();
+    // the default Normal-type target would be immune to this Ghost move
+    state.side_two.get_active().types = (PokemonType::WATER, PokemonType::TYPELESS);
+    let b = outcomes(&state, Choices::SPIRITSHACKLE, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_two.volatile_statuses.contains(&PokemonVolatileStatus::TRAPPED)));
+}
+
+#[test]
+fn test_anchor_shot_traps_target() {
+    let b = outcomes(&State::default(), Choices::ANCHORSHOT, Choices::SPLASH);
+    assert!(always(&b, |s| s.side_two.volatile_statuses.contains(&PokemonVolatileStatus::TRAPPED)));
+}

@@ -888,6 +888,8 @@ pub struct Pokemon {
     pub moves: PokemonMoves,
     /// Gen 9: Intrepid Sword / Dauntless Shield activate once per battle
     pub switch_in_boost_used: bool,
+    /// The last berry this Pokemon ate (Showdown's lastItem), for Harvest / Cud Chew
+    pub last_berry: Items,
 }
 
 impl Default for Pokemon {
@@ -917,6 +919,7 @@ impl Default for Pokemon {
             terastallized: false,
             tera_type: PokemonType::NORMAL,
             switch_in_boost_used: false,
+            last_berry: Items::NONE,
             moves: PokemonMoves {
                 m0: Default::default(),
                 m1: Default::default(),
@@ -979,7 +982,7 @@ impl Pokemon {
             self.evs.0, self.evs.1, self.evs.2, self.evs.3, self.evs.4, self.evs.5
         );
         format!(
-            "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+            "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
             self.id,
             self.level,
             self.types.0.to_string(),
@@ -1010,6 +1013,7 @@ impl Pokemon {
             self.terastallized,
             self.tera_type.to_string(),
             self.switch_in_boost_used,
+            self.last_berry.to_string(),
         )
     }
 
@@ -1068,6 +1072,9 @@ impl Pokemon {
             switch_in_boost_used: split
                 .get(29)
                 .map_or(false, |v| v.parse::<bool>().unwrap_or(false)),
+            last_berry: split
+                .get(30)
+                .map_or(Items::NONE, |v| Items::from_str(v).unwrap_or(Items::NONE)),
         }
     }
 }
@@ -1976,6 +1983,9 @@ impl State {
                 SideReference::SideOne => self.side_one.get_active().switch_in_boost_used ^= true,
                 SideReference::SideTwo => self.side_two.get_active().switch_in_boost_used ^= true,
             },
+            Instruction::SetLastBerry(instruction) => {
+                self.get_side(&instruction.side_ref).get_active().last_berry = instruction.new_berry
+            }
             Instruction::ToggleMegaEvolved(instruction) => match instruction.side_ref {
                 SideReference::SideOne => self.side_one.get_active().mega_evolved ^= true,
                 SideReference::SideTwo => self.side_two.get_active().mega_evolved ^= true,
@@ -2182,6 +2192,10 @@ impl State {
                 SideReference::SideOne => self.side_one.get_active().switch_in_boost_used ^= true,
                 SideReference::SideTwo => self.side_two.get_active().switch_in_boost_used ^= true,
             },
+            Instruction::SetLastBerry(instruction) => {
+                self.get_side(&instruction.side_ref).get_active().last_berry =
+                    instruction.previous_berry
+            }
             Instruction::ToggleMegaEvolved(instruction) => match instruction.side_ref {
                 SideReference::SideOne => self.side_one.get_active().mega_evolved ^= true,
                 SideReference::SideTwo => self.side_two.get_active().mega_evolved ^= true,

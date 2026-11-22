@@ -432,6 +432,12 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                 protect: true,
                 ..Default::default()
             },
+            // the target can't switch out while the user stays in
+            secondaries: Some(vec![Secondary {
+                chance: 100.0,
+                target: MoveTarget::Opponent,
+                effect: Effect::VolatileStatus(PokemonVolatileStatus::TRAPPED),
+            }]),
             ..Default::default()
         },
     );
@@ -16073,6 +16079,12 @@ pub static MOVES: LazyLock<HashMap<Choices, Choice>> = LazyLock::new(|| {
                 protect: true,
                 ..Default::default()
             },
+            // the target can't switch out while the user stays in
+            secondaries: Some(vec![Secondary {
+                chance: 100.0,
+                target: MoveTarget::Opponent,
+                effect: Effect::VolatileStatus(PokemonVolatileStatus::TRAPPED),
+            }]),
             ..Default::default()
         },
     );

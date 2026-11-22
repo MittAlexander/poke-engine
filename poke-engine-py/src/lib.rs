@@ -614,6 +614,7 @@ pub struct PyPokemon {
     pub tera_type: String,
     pub moves: Vec<PyMove>,
     pub switch_in_boost_used: bool,
+    pub last_berry: String,
 }
 
 impl From<Pokemon> for PyPokemon {
@@ -652,6 +653,7 @@ impl From<Pokemon> for PyPokemon {
             mega_evolved: other.mega_evolved,
             terastallized: other.terastallized,
             switch_in_boost_used: other.switch_in_boost_used,
+            last_berry: other.last_berry.to_string().to_lowercase(),
             tera_type: other.tera_type.to_string(),
             moves: other
                 .moves
@@ -700,6 +702,7 @@ impl Into<Pokemon> for PyPokemon {
             mega_evolved: self.mega_evolved,
             terastallized: self.terastallized,
             switch_in_boost_used: self.switch_in_boost_used,
+            last_berry: Items::from_str(&self.last_berry).unwrap(),
             tera_type: PokemonType::from_str(&self.tera_type).unwrap(),
             moves: PokemonMoves {
                 m0: moves_vec[0].clone().into(),
@@ -740,6 +743,7 @@ impl PyPokemon {
         terastallized=false,
         tera_type="typeless".to_string(),
         switch_in_boost_used=false,
+        last_berry="none".to_string(),
     ))]
     fn new(
         id: String,
@@ -767,6 +771,7 @@ impl PyPokemon {
         terastallized: bool,
         tera_type: String,
         switch_in_boost_used: bool,
+        last_berry: String,
     ) -> Self {
         if base_ability == "" {
             base_ability = ability.clone();
@@ -797,6 +802,7 @@ impl PyPokemon {
             tera_type,
             moves,
             switch_in_boost_used,
+            last_berry,
         }
     }
     #[staticmethod]

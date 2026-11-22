@@ -7,6 +7,7 @@ use crate::choices::{Choice, Choices, Effect, MoveCategory, MoveTarget, Secondar
 use crate::define_enum_with_from_str;
 use crate::engine::generate_instructions::add_remove_status_instructions;
 use crate::instruction::{
+    SetLastBerryInstruction,
     ChangeItemInstruction, ChangeStatusInstruction, DamageInstruction, DisableMoveInstruction,
     HealInstruction, Instruction, StateInstructions,
 };
@@ -301,6 +302,29 @@ pub fn get_choice_move_disable_instructions(
     moves_to_disable
 }
 
+/// Remember the berry a Pokemon ate (Showdown's lastItem) so Harvest / Cud Chew can use it.
+/// Only those abilities read it (for their own holder), so it is only tracked for them;
+/// this keeps the instruction lists of every other berry interaction unchanged.
+pub fn record_eaten_berry(
+    side_ref: &SideReference,
+    pkmn: &mut Pokemon,
+    berry: Items,
+    instructions: &mut StateInstructions,
+) {
+    let uses_last_berry = [Abilities::HARVEST, Abilities::CUDCHEW].contains(&pkmn.ability)
+        || [Abilities::HARVEST, Abilities::CUDCHEW].contains(&pkmn.base_ability);
+    if uses_last_berry && pkmn.last_berry != berry {
+        instructions
+            .instruction_list
+            .push(Instruction::SetLastBerry(SetLastBerryInstruction {
+                side_ref: *side_ref,
+                new_berry: berry,
+                previous_berry: pkmn.last_berry,
+            }));
+        pkmn.last_berry = berry;
+    }
+}
+
 fn damage_reduction_berry(
     defending_pkmn: &mut Pokemon,
     attacking_side_ref: &SideReference,
@@ -320,6 +344,7 @@ fn damage_reduction_berry(
                 new_item: Items::NONE,
             }));
         defending_pkmn.item = Items::NONE;
+        record_eaten_berry(&attacking_side_ref.get_other_side(), defending_pkmn, berry, instructions);
         choice.base_power /= 2.0;
     }
 }
@@ -386,6 +411,7 @@ fn lum_berry(
             new_item: Items::NONE,
         }));
     active_pkmn.item = Items::NONE;
+    record_eaten_berry(side_ref, active_pkmn, Items::LUMBERRY, instructions);
 }
 
 pub fn sitrus_berry(
@@ -410,6 +436,7 @@ pub fn sitrus_berry(
             new_item: Items::NONE,
         }));
     active_pkmn.item = Items::NONE;
+    record_eaten_berry(side_ref, active_pkmn, Items::SITRUSBERRY, instructions);
 }
 
 // A single-status-cure berry (Cheri/Chesto/Aspear/Pecha/Rawst): consume the berry and
@@ -431,6 +458,7 @@ fn status_cure_berry(
             new_item: Items::NONE,
         }));
     active_pkmn.item = Items::NONE;
+    record_eaten_berry(side_ref, active_pkmn, berry, instructions);
     add_remove_status_instructions(instructions, active_index, *side_ref, attacking_side);
 }
 
@@ -449,14 +477,16 @@ fn boost_berry(
         instructions,
     );
     let attacker = state.get_side(side_ref).get_active();
+    let berry = attacker.item;
     instructions
         .instruction_list
         .push(Instruction::ChangeItem(ChangeItemInstruction {
             side_ref: *side_ref,
-            current_item: attacker.item,
+            current_item: berry,
             new_item: Items::NONE,
         }));
     attacker.item = Items::NONE;
+    record_eaten_berry(side_ref, attacker, berry, instructions);
 }
 
 pub fn item_before_move(
@@ -504,6 +534,12 @@ pub fn item_before_move(
                     },
                 ));
                 defending_pkmn.item = Items::NONE;
+                record_eaten_berry(
+                    &side_ref.get_other_side(),
+                    defending_pkmn,
+                    Items::CHILANBERRY,
+                    instructions,
+                );
                 choice.base_power /= 2.0;
             }
         }

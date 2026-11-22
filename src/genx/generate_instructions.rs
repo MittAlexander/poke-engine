@@ -21,14 +21,16 @@ use crate::instruction::{
     ToggleDamageDealtHitSubstituteInstruction, ToggleMegaEvolvedInstruction,
     ToggleShedTailingInstruction, ToggleTrickRoomInstruction,
 };
-use crate::instruction::{ChangeAbilityInstruction, ToggleTerastallizedInstruction};
+use crate::instruction::{
+    ChangeAbilityInstruction, SetLastBerryInstruction, ToggleTerastallizedInstruction,
+};
 use crate::instruction::{DecrementFutureSightInstruction, FormeChangeInstruction};
 use crate::instruction::{DecrementPPInstruction, SetLastUsedMoveInstruction};
 
 use super::damage_calc::calculate_futuresight_damage;
 use super::damage_calc::{calculate_damage, type_effectiveness_modifier, DamageRolls};
 use super::items::{
-    hp_berry_after_action, item_before_move, item_end_of_turn, item_modify_attack_against,
+    hp_berry_after_action, item_before_move, record_eaten_berry, item_end_of_turn, item_modify_attack_against,
     item_modify_attack_being_used,
     item_on_switch_in, Items,
 };
@@ -886,6 +888,7 @@ fn get_instructions_from_status_effects(
 
     let instruction = if target_pkmn.item == Items::LUMBERRY {
         target_pkmn.item = Items::NONE;
+        record_eaten_berry(&target_side_ref, target_pkmn, Items::LUMBERRY, incoming_instructions);
         Instruction::ChangeItem(ChangeItemInstruction {
             side_ref: target_side_ref,
             current_item: Items::LUMBERRY,
@@ -893,6 +896,7 @@ fn get_instructions_from_status_effects(
         })
     } else if target_pkmn.item == Items::CHESTOBERRY && status.status == PokemonStatus::SLEEP {
         target_pkmn.item = Items::NONE;
+        record_eaten_berry(&target_side_ref, target_pkmn, Items::CHESTOBERRY, incoming_instructions);
         Instruction::ChangeItem(ChangeItemInstruction {
             side_ref: target_side_ref,
             current_item: Items::CHESTOBERRY,
@@ -2668,6 +2672,18 @@ fn moves_first(
                     new_item: Items::NONE,
                     current_item: Items::CUSTAPBERRY,
                 }));
+            if side_one_active.last_berry != Items::CUSTAPBERRY
+                && ([Abilities::HARVEST, Abilities::CUDCHEW].contains(&side_one_active.ability)
+                    || [Abilities::HARVEST, Abilities::CUDCHEW].contains(&side_one_active.base_ability))
+            {
+                incoming_instructions
+                    .instruction_list
+                    .push(Instruction::SetLastBerry(SetLastBerryInstruction {
+                        side_ref: SideReference::SideOne,
+                        new_berry: Items::CUSTAPBERRY,
+                        previous_berry: side_one_active.last_berry,
+                    }));
+            }
             return SideMovesFirst::SideOne;
         } else if side_two_active.item == Items::CUSTAPBERRY
             && side_two_active.hp < side_two_active.maxhp / 4
@@ -2679,6 +2695,18 @@ fn moves_first(
                     new_item: Items::NONE,
                     current_item: Items::CUSTAPBERRY,
                 }));
+            if side_two_active.last_berry != Items::CUSTAPBERRY
+                && ([Abilities::HARVEST, Abilities::CUDCHEW].contains(&side_two_active.ability)
+                    || [Abilities::HARVEST, Abilities::CUDCHEW].contains(&side_two_active.base_ability))
+            {
+                incoming_instructions
+                    .instruction_list
+                    .push(Instruction::SetLastBerry(SetLastBerryInstruction {
+                        side_ref: SideReference::SideTwo,
+                        new_berry: Items::CUSTAPBERRY,
+                        previous_berry: side_two_active.last_berry,
+                    }));
+            }
             return SideMovesFirst::SideTwo;
         }
 
@@ -4246,22 +4274,30 @@ pub fn generate_instructions_from_move_pair(
         return state_instructions_vec;
     }
 
-    // run switches
+    // run switches. When both sides switch, the faster outgoing Pokemon switches first
+    // (reversed under Trick Room), and its switch-in effects (e.g. Intimidate) resolve
+    // before the other side switches. Speed ties go to side one (Showdown: random).
+    let mut switches = vec![];
     if let MoveChoice::Switch(switch_id) = side_one_move {
-        generate_instructions_from_switch(
-            state,
-            *switch_id,
-            SideReference::SideOne,
-            &mut incoming_instructions,
-        );
+        switches.push((SideReference::SideOne, *switch_id));
     }
     if let MoveChoice::Switch(switch_id) = side_two_move {
-        generate_instructions_from_switch(
-            state,
-            *switch_id,
-            SideReference::SideTwo,
-            &mut incoming_instructions,
-        );
+        switches.push((SideReference::SideTwo, *switch_id));
+    }
+    if switches.len() == 2 {
+        let s1_speed = get_effective_speed(&state, &SideReference::SideOne);
+        let s2_speed = get_effective_speed(&state, &SideReference::SideTwo);
+        let side_two_first = if state.trick_room.active {
+            s2_speed < s1_speed
+        } else {
+            s2_speed > s1_speed
+        };
+        if side_two_first {
+            switches.swap(0, 1);
+        }
+    }
+    for (side_ref, switch_id) in switches {
+        generate_instructions_from_switch(state, switch_id, side_ref, &mut incoming_instructions);
     }
     if s1_tera {
         state.side_one.get_active().terastallized = true;
@@ -4397,7 +4433,112 @@ pub fn generate_instructions_from_move_pair(
             state_instructions_vec.extend(side_two_moves_first_si);
         }
     }
-    state_instructions_vec
+    if s1_replacing_fainted_pkmn || s2_replacing_fainted_pkmn {
+        return state_instructions_vec;
+    }
+    end_of_turn_chance_effects(state, state_instructions_vec)
+}
+
+/// End-of-turn effects that happen with a probability, resolved after the deterministic
+/// end-of-turn processing by splitting each branch. Each side's effect is independent,
+/// so the branches are the product of the per-side outcomes.
+///
+/// Harvest (Showdown residual order 28, i.e. near the end): 50% chance, or 100% in sun,
+/// to regrow the last eaten berry when the holder has no item. A regrown Sitrus Berry is
+/// eaten again right away at <= 50% HP (Showdown's Update after the residual phase).
+fn end_of_turn_chance_effects(
+    state: &mut State,
+    branches: Vec<StateInstructions>,
+) -> Vec<StateInstructions> {
+    let mut out = Vec::with_capacity(branches.len());
+    for branch in branches {
+        state.apply_instructions(&branch.instruction_list);
+        if state.side_one.force_switch || state.side_two.force_switch {
+            state.reverse_instructions(&branch.instruction_list);
+            out.push(branch);
+            continue;
+        }
+        // per side: list of (probability, extra instructions)
+        let mut per_side: Vec<Vec<(f32, Vec<Instruction>)>> = vec![];
+        for side_ref in [SideReference::SideOne, SideReference::SideTwo] {
+            per_side.push(harvest_outcomes(state, &side_ref));
+        }
+        state.reverse_instructions(&branch.instruction_list);
+
+        let mut combined: Vec<(f32, Vec<Instruction>)> = vec![(1.0, vec![])];
+        for outcomes in per_side {
+            let mut next = vec![];
+            for (p, ins) in &combined {
+                for (q, extra) in &outcomes {
+                    let mut all = ins.clone();
+                    all.extend(extra.iter().cloned());
+                    next.push((p * q, all));
+                }
+            }
+            combined = next;
+        }
+        for (p, extra) in combined {
+            if p == 0.0 {
+                continue;
+            }
+            let mut b = branch.clone();
+            b.update_percentage(p);
+            b.instruction_list.extend(extra);
+            out.push(b);
+        }
+    }
+    out
+}
+
+fn harvest_outcomes(state: &State, side_ref: &SideReference) -> Vec<(f32, Vec<Instruction>)> {
+    let side = state.get_side_immutable(side_ref);
+    let active = side.get_active_immutable();
+    let berry = active.last_berry;
+    if active.ability != Abilities::HARVEST
+        || active.hp <= 0
+        || active.item != Items::NONE
+        || berry == Items::NONE
+    {
+        return vec![(1.0, vec![])];
+    }
+    let mut regrow = vec![
+        Instruction::ChangeItem(ChangeItemInstruction {
+            side_ref: *side_ref,
+            current_item: Items::NONE,
+            new_item: berry,
+        }),
+        Instruction::SetLastBerry(SetLastBerryInstruction {
+            side_ref: *side_ref,
+            new_berry: Items::NONE,
+            previous_berry: berry,
+        }),
+    ];
+    let opponent_unnerve = state
+        .get_side_immutable(&side_ref.get_other_side())
+        .get_active_immutable()
+        .ability
+        == Abilities::UNNERVE;
+    if berry == Items::SITRUSBERRY && active.hp <= active.maxhp / 2 && !opponent_unnerve {
+        regrow.push(Instruction::Heal(HealInstruction {
+            side_ref: *side_ref,
+            heal_amount: cmp::min(active.maxhp / 4, active.maxhp - active.hp),
+        }));
+        regrow.push(Instruction::ChangeItem(ChangeItemInstruction {
+            side_ref: *side_ref,
+            current_item: Items::SITRUSBERRY,
+            new_item: Items::NONE,
+        }));
+        regrow.push(Instruction::SetLastBerry(SetLastBerryInstruction {
+            side_ref: *side_ref,
+            new_berry: Items::SITRUSBERRY,
+            previous_berry: Items::NONE,
+        }));
+    }
+    if state.weather_is_active(&Weather::SUN) || state.weather_is_active(&Weather::HARSHSUN) {
+        vec![(1.0, regrow)]
+    } else {
+        vec![(0.5, vec![]), (0.5, regrow)]
+    }
 }
 
 fn get_instructions_from_pursuit_hitting_switching_target(

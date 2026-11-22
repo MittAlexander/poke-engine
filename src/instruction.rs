@@ -91,6 +91,7 @@ pub enum Instruction {
     ToggleSideTwoForceSwitch,
     ToggleTerastallized(ToggleTerastallizedInstruction),
     ToggleSwitchInBoostUsed(ToggleSwitchInBoostUsedInstruction),
+    SetLastBerry(SetLastBerryInstruction),
     ToggleMegaEvolved(ToggleMegaEvolvedInstruction),
     TeamPreviewFaintIndex(SideReference, PokemonIndex),
     ToggleTeamPreview,
@@ -297,6 +298,11 @@ impl fmt::Debug for Instruction {
             Instruction::ToggleSwitchInBoostUsed(s) => {
                 write!(f, "ToggleSwitchInBoostUsed {:?}", s.side_ref)
             }
+            Instruction::SetLastBerry(s) => write!(
+                f,
+                "SetLastBerry {:?}: {:?} -> {:?}",
+                s.side_ref, s.previous_berry, s.new_berry
+            ),
             Instruction::ToggleMegaEvolved(s) => {
                 write!(f, "ToggleMegaEvolved {:?}", s.side_ref)
             }
@@ -577,6 +583,13 @@ pub struct ToggleTerastallizedInstruction {
 #[derive(Debug, PartialEq, Clone)]
 pub struct ToggleSwitchInBoostUsedInstruction {
     pub side_ref: SideReference,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct SetLastBerryInstruction {
+    pub side_ref: SideReference,
+    pub new_berry: Items,
+    pub previous_berry: Items,
 }
 
 #[derive(Debug, PartialEq, Clone)]
